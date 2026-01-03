@@ -21,6 +21,7 @@ export component AppWindow inherits Window {
     in-out property <bool> reduce_motion: false;
     in-out property <int> lock_shimmer_phase: 0;
     in-out property <bool> shade_open: false;
+    in-out property <int> desktop_page_index: 0;
 
     background: Theme.window_bg;
 
@@ -56,13 +57,15 @@ export component AppWindow inherits Window {
             height: parent.height;
         }
 
-        DesktopScreen {
+        desktop := DesktopScreen {
             width: parent.width;
             height: parent.height;
             time_text: root.time_text;
             date_text: root.date_text;
             reduce_motion: root.reduce_motion;
+            page_index <=> root.desktop_page_index;
             open_app(label) => { root.open_app(label); }
+            visible: !root.locked;
         }
 
         lock := LockScreen {
@@ -72,7 +75,7 @@ export component AppWindow inherits Window {
             date_text: root.date_text;
             reduce_motion: root.reduce_motion;
             shimmer_phase: root.lock_shimmer_phase;
-            unlock_requested => { root.locked = false; }
+            unlock_requested => { root.desktop_page_index = 0; root.locked = false; }
 
             // Transition to desktop.
             y: root.locked ? 0px : -self.height;
