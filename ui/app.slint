@@ -59,6 +59,10 @@ export component AppWindow inherits Window {
         DesktopScreen {
             width: parent.width;
             height: parent.height;
+            time_text: root.time_text;
+            date_text: root.date_text;
+            reduce_motion: root.reduce_motion;
+            open_app(label) => { root.open_app(label); }
         }
 
         lock := LockScreen {

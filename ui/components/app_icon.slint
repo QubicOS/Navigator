@@ -1,0 +1,70 @@
+import { Theme } from "theme.slint";
+
+export component AppIcon inherits Rectangle {
+    in property <string> label: "";
+    in property <image> icon;
+    in property <bool> compact: false;
+
+    callback activated(string);
+
+    border-width: 1px;
+    border-color: Theme.border;
+    border-radius: Theme.radius_md;
+    background: @linear-gradient(180deg, Theme.surface_bg 0%, Theme.surface_bg_2 100%);
+    clip: true;
+
+    Rectangle {
+        x: 1px;
+        y: 1px;
+        width: parent.width - 2px;
+        height: parent.height * 0.45;
+        background: #ffffff10;
+        border-radius: Theme.radius_md - 1px;
+        opacity: 0.9;
+    }
+
+    Image {
+        x: (parent.width - (root.compact ? 20px : 26px)) / 2;
+        y: root.compact ? 8px : 10px;
+        width: root.compact ? 20px : 26px;
+        height: self.width;
+        source: root.icon;
+        image-fit: contain;
+    }
+
+    Text {
+        x: 6px;
+        y: parent.height - (root.compact ? 16px : 18px);
+        width: parent.width - 12px;
+        height: root.compact ? 12px : 14px;
+        text: root.label;
+        color: Theme.text;
+        font-size: root.compact ? Theme.font_xs : Theme.font_sm;
+        font-weight: 700;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+
+    pressed_overlay := Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: Theme.focus_ring;
+        opacity: 0.0;
+        animate opacity { duration: Theme.anim_fast; }
+    }
+
+    TouchArea {
+        width: parent.width;
+        height: parent.height;
+        pointer-event(event) => {
+            if (event.button != PointerEventButton.left) { return; }
+            if (event.kind == PointerEventKind.down) {
+                pressed_overlay.opacity = 1.0;
+            } else if (event.kind == PointerEventKind.up || event.kind == PointerEventKind.cancel) {
+                pressed_overlay.opacity = 0.0;
+            }
+        }
+        clicked => { root.activated(root.label); }
+    }
+}
+
