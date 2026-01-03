@@ -12,8 +12,21 @@ export component AppIcon inherits Rectangle {
     clip: true;
 
     out property <bool> pressed: touch.pressed;
-    property <length> press_offset: root.pressed ? 2px : 0px;
+    property <bool> pulse: false;
+    property <bool> active: root.pressed || root.pulse;
+
+    property <length> press_depth: root.compact ? 5px : 4px;
+    property <length> press_offset: root.active ? press_depth : 0px;
     animate press_offset { duration: root.reduce_motion ? 0ms : Theme.anim_fast; easing: ease-out; }
+
+    pulse_timer := Timer {
+        interval: 120ms;
+        running: false;
+        triggered => {
+            self.running = false;
+            root.pulse = false;
+        }
+    }
 
     // Subtle press feedback (no card/background).
     Rectangle {
@@ -24,7 +37,7 @@ export component AppIcon inherits Rectangle {
         height: self.size;
         border-radius: 12px;
         background: Theme.focus_ring;
-        opacity: root.pressed ? 1.0 : 0.0;
+        opacity: root.active ? 1.0 : 0.0;
         animate opacity { duration: root.reduce_motion ? 0ms : Theme.anim_fast; easing: ease-out; }
     }
 
@@ -36,7 +49,7 @@ export component AppIcon inherits Rectangle {
         height: self.img_size;
         source: root.icon;
         image-fit: contain;
-        opacity: root.pressed ? 0.85 : 1.0;
+        opacity: root.active ? 0.78 : 1.0;
         animate opacity { duration: root.reduce_motion ? 0ms : Theme.anim_fast; easing: ease-out; }
     }
 
@@ -53,9 +66,24 @@ export component AppIcon inherits Rectangle {
         vertical-alignment: center;
     }
 
+    // Extra feedback visible even on very fast clicks.
+    Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: #00000010;
+        opacity: root.active ? 1.0 : 0.0;
+        animate opacity { duration: root.reduce_motion ? 0ms : Theme.anim_fast; easing: ease-out; }
+    }
+
     touch := TouchArea {
         width: parent.width;
         height: parent.height;
-        clicked => { root.activated(root.label); }
+        clicked => {
+            if (!root.reduce_motion) {
+                root.pulse = true;
+                pulse_timer.running = true;
+            }
+            root.activated(root.label);
+        }
     }
 }
