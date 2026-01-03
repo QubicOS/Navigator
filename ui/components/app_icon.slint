@@ -25,7 +25,7 @@ export component AppIcon inherits Rectangle {
         animate opacity { duration: Theme.anim_fast; }
     }
 
-    Image {
+    img := Image {
         property <length> img_size: root.compact ? 66px : 52px;
         x: (parent.width - self.img_size) / 2;
         y: root.compact ? 8px : 10px;
@@ -39,7 +39,7 @@ export component AppIcon inherits Rectangle {
 
     Text {
         x: 6px;
-        y: parent.height - (root.compact ? 18px : 22px);
+        y: img.y + img.height + (root.compact ? 6px : 8px);
         width: parent.width - 12px;
         height: root.compact ? 14px : 16px;
         text: root.label;

@@ -92,7 +92,7 @@ export component DesktopScreen inherits Rectangle {
                 spacing-vertical: 10px;
 
                 property <length> tile_w: (self.width - 20px) / 3;
-                property <length> tile_h: 72px;
+                property <length> tile_h: 92px;
 
                 AppIcon { row: 0; col: 0; width: tile_w; height: tile_h; label: "Почта"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
                 AppIcon { row: 0; col: 1; width: tile_w; height: tile_h; label: "Чаты"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
