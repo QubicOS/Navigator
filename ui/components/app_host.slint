@@ -1,0 +1,149 @@
+import { Theme } from "theme.slint";
+import { SettingsApp } from "apps/settings.slint";
+
+export component AppHost inherits Rectangle {
+    in-out property <bool> open: false;
+    in-out property <string> app_id: "";
+    in property <bool> reduce_motion: false;
+
+    background: #00000000;
+    visible: open || panel.opacity > 0.0;
+
+    function close() {
+        root.open = false;
+        root.app_id = "";
+    }
+
+    Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: Theme.scrim;
+        opacity: root.open ? 1.0 : 0.0;
+        animate opacity { duration: root.reduce_motion ? 0ms : Theme.anim_fast; }
+    }
+
+    TouchArea {
+        width: parent.width;
+        height: parent.height;
+        enabled: root.open;
+        clicked => { root.close(); }
+    }
+
+    panel := Rectangle {
+        x: 0px;
+        y: root.open ? 0px : parent.height;
+        width: parent.width;
+        height: parent.height;
+        background: Theme.surface_bg;
+        border-width: 1px;
+        border-color: Theme.border;
+        border-radius: Theme.radius_lg;
+        clip: true;
+        opacity: root.open ? 1.0 : 0.0;
+
+        animate y { duration: root.reduce_motion ? 0ms : Theme.anim_med; easing: ease-in-out; }
+        animate opacity { duration: root.reduce_motion ? 0ms : Theme.anim_med; }
+
+        Rectangle {
+            x: (parent.width - 44px) / 2;
+            y: 8px;
+            width: 44px;
+            height: 4px;
+            border-radius: 2px;
+            background: Theme.border;
+            opacity: 0.75;
+        }
+
+        property <string> title:
+            root.app_id == "settings" ? "Настройки"
+          : root.app_id == "terminal" ? "Терминал"
+          : root.app_id == "apps" ? "Приложения"
+          : "Приложение";
+
+        Text {
+            x: Theme.gutter;
+            y: 16px;
+            text: panel.title;
+            color: Theme.text;
+            font-size: Theme.font_xl;
+            font-weight: 800;
+        }
+
+        Rectangle {
+            x: parent.width - Theme.gutter - 28px;
+            y: 12px;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: #00000000;
+
+            Text {
+                width: parent.width;
+                height: parent.height;
+                text: "×";
+                color: Theme.text_dim;
+                font-size: 18px;
+                font-weight: 700;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+
+            TouchArea {
+                width: parent.width;
+                height: parent.height;
+                clicked => { root.close(); }
+            }
+        }
+
+        Rectangle {
+            x: 0px;
+            y: 44px;
+            width: parent.width;
+            height: 1px;
+            background: Theme.border;
+        }
+
+        content := Rectangle {
+            x: 0px;
+            y: 45px;
+            width: parent.width;
+            height: parent.height - 45px;
+            background: #00000000;
+            clip: true;
+
+            SettingsApp {
+                width: parent.width;
+                height: parent.height;
+                visible: root.app_id == "settings";
+            }
+
+            Text {
+                visible: root.app_id != "" && root.app_id != "settings";
+                width: parent.width;
+                height: parent.height;
+                text: "Пока не реализовано";
+                color: Theme.text_muted;
+                font-size: Theme.font_md;
+                font-weight: 600;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+        }
+    }
+
+    SwipeGestureHandler {
+        x: 0px;
+        y: panel.y;
+        width: parent.width;
+        height: root.open ? 56px : 0px;
+        enabled: root.open;
+        handle-swipe-down: true;
+
+        swiped => {
+            if ((self.current-position.y - self.pressed-position.y) > 22px) {
+                root.close();
+            }
+        }
+    }
+}
+

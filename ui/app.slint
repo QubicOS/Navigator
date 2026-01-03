@@ -4,6 +4,7 @@ import { LockScreen } from "components/lock_screen.slint";
 import { NotificationShade } from "components/notification_shade.slint";
 import { DesktopScreen } from "components/desktop.slint";
 import { AbstractBackground } from "components/abstract_background.slint";
+import { AppHost } from "components/app_host.slint";
 
 export component AppWindow inherits Window {
     min-width: 320px;
@@ -22,6 +23,8 @@ export component AppWindow inherits Window {
     in-out property <int> lock_shimmer_phase: 0;
     in-out property <bool> shade_open: false;
     in-out property <int> desktop_page_index: 0;
+    in-out property <bool> app_open: false;
+    in-out property <string> current_app_id: "";
 
     background: Theme.window_bg;
 
@@ -66,6 +69,15 @@ export component AppWindow inherits Window {
             page_index <=> root.desktop_page_index;
             open_app(label) => { root.open_app(label); }
             visible: !root.locked;
+        }
+
+        AppHost {
+            width: parent.width;
+            height: parent.height;
+            visible: !root.locked;
+            open <=> root.app_open;
+            app_id <=> root.current_app_id;
+            reduce_motion: root.reduce_motion;
         }
 
         lock := LockScreen {
