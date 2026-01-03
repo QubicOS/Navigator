@@ -60,9 +60,9 @@ export component DesktopScreen inherits Rectangle {
                 property <length> tile_w: (self.width - 20px) / 3;
                 property <length> tile_h: 104px;
 
-                AppIcon { x: 0px; width: tile_w; height: tile_h; compact: true; label: "Настройки"; icon: @image-url("../../assets/settings.png"); activated(label) => { root.open_app(label); } }
-                AppIcon { x: (parent.width - tile_w) / 2; width: tile_w; height: tile_h; compact: true; label: "Терминал"; icon: @image-url("../../assets/terminal.png"); activated(label) => { root.open_app(label); } }
-                AppIcon { x: parent.width - tile_w; width: tile_w; height: tile_h; compact: true; label: "Приложения"; icon: @image-url("../../assets/apps.png"); activated(label) => { root.open_app(label); } }
+                AppIcon { x: 0px; width: tile_w; height: tile_h; compact: true; reduce_motion: root.reduce_motion; label: "Настройки"; icon: @image-url("../../assets/settings.png"); activated(label) => { root.open_app(label); } }
+                AppIcon { x: (parent.width - tile_w) / 2; width: tile_w; height: tile_h; compact: true; reduce_motion: root.reduce_motion; label: "Терминал"; icon: @image-url("../../assets/terminal.png"); activated(label) => { root.open_app(label); } }
+                AppIcon { x: parent.width - tile_w; width: tile_w; height: tile_h; compact: true; reduce_motion: root.reduce_motion; label: "Приложения"; icon: @image-url("../../assets/apps.png"); activated(label) => { root.open_app(label); } }
             }
         }
 
@@ -94,12 +94,12 @@ export component DesktopScreen inherits Rectangle {
                 property <length> tile_w: (self.width - 20px) / 3;
                 property <length> tile_h: 92px;
 
-                AppIcon { row: 0; col: 0; width: tile_w; height: tile_h; label: "Почта"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
-                AppIcon { row: 0; col: 1; width: tile_w; height: tile_h; label: "Чаты"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
-                AppIcon { row: 0; col: 2; width: tile_w; height: tile_h; label: "Календарь"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
-                AppIcon { row: 1; col: 0; width: tile_w; height: tile_h; label: "Контакты"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
-                AppIcon { row: 1; col: 1; width: tile_w; height: tile_h; label: "Браузер"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
-                AppIcon { row: 1; col: 2; width: tile_w; height: tile_h; label: "Медиа"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+                AppIcon { row: 0; col: 0; width: tile_w; height: tile_h; reduce_motion: root.reduce_motion; label: "Почта"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+                AppIcon { row: 0; col: 1; width: tile_w; height: tile_h; reduce_motion: root.reduce_motion; label: "Чаты"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+                AppIcon { row: 0; col: 2; width: tile_w; height: tile_h; reduce_motion: root.reduce_motion; label: "Календарь"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+                AppIcon { row: 1; col: 0; width: tile_w; height: tile_h; reduce_motion: root.reduce_motion; label: "Контакты"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+                AppIcon { row: 1; col: 1; width: tile_w; height: tile_h; reduce_motion: root.reduce_motion; label: "Браузер"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+                AppIcon { row: 1; col: 2; width: tile_w; height: tile_h; reduce_motion: root.reduce_motion; label: "Медиа"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
             }
         }
     }

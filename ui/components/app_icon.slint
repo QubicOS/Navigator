@@ -4,6 +4,7 @@ export component AppIcon inherits Rectangle {
     in property <string> label: "";
     in property <image> icon;
     in property <bool> compact: false;
+    in property <bool> reduce_motion: false;
 
     callback activated(string);
 
@@ -11,35 +12,37 @@ export component AppIcon inherits Rectangle {
     clip: true;
 
     out property <bool> pressed: false;
+    property <length> press_offset: root.pressed ? 2px : 0px;
+    animate press_offset { duration: root.reduce_motion ? 0ms : Theme.anim_fast; easing: ease-out; }
 
     // Subtle press feedback (no card/background).
     Rectangle {
         property <length> size: root.compact ? 76px : 60px;
         x: (parent.width - self.size) / 2;
-        y: root.compact ? 6px : 8px;
+        y: (root.compact ? 6px : 8px) + root.press_offset;
         width: self.size;
         height: self.size;
         border-radius: 12px;
         background: Theme.focus_ring;
         opacity: root.pressed ? 1.0 : 0.0;
-        animate opacity { duration: Theme.anim_fast; }
+        animate opacity { duration: root.reduce_motion ? 0ms : Theme.anim_fast; easing: ease-out; }
     }
 
     img := Image {
         property <length> img_size: root.compact ? 66px : 52px;
         x: (parent.width - self.img_size) / 2;
-        y: root.compact ? 8px : 10px;
+        y: (root.compact ? 8px : 10px) + root.press_offset;
         width: self.img_size;
         height: self.img_size;
         source: root.icon;
         image-fit: contain;
         opacity: root.pressed ? 0.85 : 1.0;
-        animate opacity { duration: Theme.anim_fast; }
+        animate opacity { duration: root.reduce_motion ? 0ms : Theme.anim_fast; easing: ease-out; }
     }
 
     Text {
         x: 6px;
-        y: img.y + img.height + (root.compact ? 6px : 8px);
+        y: img.y + img.height + (root.compact ? 6px : 8px) + root.press_offset;
         width: parent.width - 12px;
         height: root.compact ? 14px : 16px;
         text: root.label;
