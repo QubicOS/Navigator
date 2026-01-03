@@ -6,6 +6,7 @@ export component LockScreen inherits Rectangle {
     in property <string> date_text: "";
     in property <bool> reduce_motion: false;
     in property <int> shimmer_phase: 0;
+    callback unlock_requested();
 
     background: Theme.surface_bg;
 
@@ -116,6 +117,21 @@ export component LockScreen inherits Rectangle {
             x: root.reduce_motion ? -self.width : (Math.mod(root.shimmer_phase, 2) == 0 ? -self.width : parent.width);
             animate x { duration: Theme.lock_shimmer_period; easing: linear; }
             animate opacity { duration: Theme.anim_fast; }
+        }
+    }
+
+    // Unlock gesture (transition only; no auth yet).
+    SwipeGestureHandler {
+        x: 0px;
+        y: 0px;
+        width: parent.width;
+        height: parent.height;
+        handle-swipe-up: true;
+
+        swiped => {
+            if ((self.pressed-position.y - self.current-position.y) > 22px) {
+                root.unlock_requested();
+            }
         }
     }
 }

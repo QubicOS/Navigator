@@ -1,6 +1,8 @@
 import { Theme } from "components/theme.slint";
 import { StatusBar } from "components/status_bar.slint";
 import { LockScreen } from "components/lock_screen.slint";
+import { NotificationShade } from "components/notification_shade.slint";
+import { DesktopScreen } from "components/desktop.slint";
 
 export component AppWindow inherits Window {
     min-width: 320px;
@@ -17,6 +19,7 @@ export component AppWindow inherits Window {
     in-out property <bool> locked: true;
     in-out property <bool> reduce_motion: false;
     in-out property <int> lock_shimmer_phase: 0;
+    in-out property <bool> shade_open: false;
 
     background: Theme.window_bg;
 
@@ -47,16 +50,39 @@ export component AppWindow inherits Window {
         height: parent.height - Theme.status_bar_height;
         background: Theme.surface_bg;
 
-        LockScreen {
+        DesktopScreen {
             width: parent.width;
             height: parent.height;
-            visible: root.locked;
+        }
+
+        lock := LockScreen {
+            width: parent.width;
+            height: parent.height;
             time_text: root.time_text;
             date_text: root.date_text;
             reduce_motion: root.reduce_motion;
             shimmer_phase: root.lock_shimmer_phase;
+            unlock_requested => { root.locked = false; }
+
+            // Transition to desktop.
+            y: root.locked ? 0px : -self.height;
+            opacity: root.locked ? 1.0 : 0.0;
+            visible: root.locked || self.opacity > 0.0;
+            animate y { duration: root.reduce_motion ? 0ms : Theme.anim_med; easing: ease-in-out; }
+            animate opacity { duration: root.reduce_motion ? 0ms : Theme.anim_med; }
         }
 
         @children
+    }
+
+    NotificationShade {
+        x: 0px;
+        y: 0px;
+        width: parent.width;
+        height: parent.height;
+        shade_open <=> root.shade_open;
+        reduce_motion: root.reduce_motion;
+        time_text: root.time_text;
+        date_text: root.date_text;
     }
 }
