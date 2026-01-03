@@ -11,7 +11,7 @@ export component AppIcon inherits Rectangle {
     background: #00000000;
     clip: true;
 
-    out property <bool> pressed: false;
+    out property <bool> pressed: touch.pressed;
     property <length> press_offset: root.pressed ? 2px : 0px;
     animate press_offset { duration: root.reduce_motion ? 0ms : Theme.anim_fast; easing: ease-out; }
 
@@ -53,17 +53,9 @@ export component AppIcon inherits Rectangle {
         vertical-alignment: center;
     }
 
-    TouchArea {
+    touch := TouchArea {
         width: parent.width;
         height: parent.height;
-        pointer-event(event) => {
-            if (event.button != PointerEventButton.left) { return; }
-            if (event.kind == PointerEventKind.down) {
-                root.pressed = true;
-            } else if (event.kind == PointerEventKind.up || event.kind == PointerEventKind.cancel) {
-                root.pressed = false;
-            }
-        }
         clicked => { root.activated(root.label); }
     }
 }
