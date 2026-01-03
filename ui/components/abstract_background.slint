@@ -1,0 +1,46 @@
+import { Theme } from "theme.slint";
+
+export component AbstractBackground inherits Rectangle {
+    // Static abstract background using theme colors (no images).
+    background: @linear-gradient(180deg, Theme.window_bg 0%, Theme.surface_bg 55%, Theme.surface_bg_2 100%);
+    clip: true;
+
+    // Soft accent blobs.
+    Rectangle {
+        x: -80px;
+        y: -60px;
+        width: 220px;
+        height: 220px;
+        border-radius: self.width / 2;
+        background: @radial-gradient(circle, Theme.accent_2 0%, #00000000 70%);
+        opacity: 0.22;
+    }
+
+    Rectangle {
+        x: parent.width - 160px;
+        y: -90px;
+        width: 260px;
+        height: 260px;
+        border-radius: self.width / 2;
+        background: @radial-gradient(circle, Theme.accent 0%, #00000000 72%);
+        opacity: 0.18;
+    }
+
+    Rectangle {
+        x: parent.width - 220px;
+        y: parent.height - 180px;
+        width: 320px;
+        height: 320px;
+        border-radius: self.width / 2;
+        background: @radial-gradient(circle, Theme.border 0%, #00000000 75%);
+        opacity: 0.14;
+    }
+
+    // Subtle vignette for depth.
+    Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: @radial-gradient(circle, #00000000 0%, #00000000 55%, Theme.shadow 100%);
+        opacity: 0.18;
+    }
+}

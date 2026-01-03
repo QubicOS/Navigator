@@ -3,6 +3,7 @@ import { StatusBar } from "components/status_bar.slint";
 import { LockScreen } from "components/lock_screen.slint";
 import { NotificationShade } from "components/notification_shade.slint";
 import { DesktopScreen } from "components/desktop.slint";
+import { AbstractBackground } from "components/abstract_background.slint";
 
 export component AppWindow inherits Window {
     min-width: 320px;
@@ -48,7 +49,12 @@ export component AppWindow inherits Window {
         y: Theme.status_bar_height;
         width: parent.width;
         height: parent.height - Theme.status_bar_height;
-        background: Theme.surface_bg;
+        background: #00000000;
+
+        AbstractBackground {
+            width: parent.width;
+            height: parent.height;
+        }
 
         DesktopScreen {
             width: parent.width;
