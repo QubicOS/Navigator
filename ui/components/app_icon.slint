@@ -14,10 +14,11 @@ export component AppIcon inherits Rectangle {
 
     // Subtle press feedback (no card/background).
     Rectangle {
-        x: (parent.width - 46px) / 2;
+        property <length> size: root.compact ? 76px : 60px;
+        x: (parent.width - self.size) / 2;
         y: root.compact ? 6px : 8px;
-        width: 46px;
-        height: 46px;
+        width: self.size;
+        height: self.size;
         border-radius: 12px;
         background: Theme.focus_ring;
         opacity: root.pressed ? 1.0 : 0.0;
@@ -25,7 +26,7 @@ export component AppIcon inherits Rectangle {
     }
 
     Image {
-        property <length> img_size: root.compact ? 44px : 52px;
+        property <length> img_size: root.compact ? 66px : 52px;
         x: (parent.width - self.img_size) / 2;
         y: root.compact ? 8px : 10px;
         width: self.img_size;

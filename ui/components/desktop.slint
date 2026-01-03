@@ -52,13 +52,13 @@ export component DesktopScreen inherits Rectangle {
 
             quick := Rectangle {
                 x: Theme.gutter;
-                y: 118px;
+                y: 90px;
                 width: parent.width - Theme.gutter * 2;
-                height: 84px;
+                height: 104px;
                 background: #00000000;
 
                 property <length> tile_w: (self.width - 20px) / 3;
-                property <length> tile_h: 80px;
+                property <length> tile_h: 104px;
 
                 AppIcon { x: 0px; width: tile_w; height: tile_h; compact: true; label: "Настройки"; icon: @image-url("../../assets/settings.png"); activated(label) => { root.open_app(label); } }
                 AppIcon { x: (parent.width - tile_w) / 2; width: tile_w; height: tile_h; compact: true; label: "Терминал"; icon: @image-url("../../assets/terminal.png"); activated(label) => { root.open_app(label); } }
