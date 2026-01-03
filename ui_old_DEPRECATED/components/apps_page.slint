@@ -1,0 +1,42 @@
+import { AppIcon } from "app_icon.slint";
+
+export component AppsPage inherits Rectangle {
+    // Grid sizing from the parent window.
+    in property <length> app_icon_width;
+    in property <length> app_icon_height;
+    in property <length> app_grid_spacing;
+    in property <length> app_grid_width;
+    in property <length> app_grid_height;
+
+    // Callback for launching a tile.
+    callback open_app(string);
+
+    Flickable {
+        width: parent.width;
+        height: parent.height;
+        x: 0px;
+        interactive: true;
+
+        app_grid := GridLayout {
+            width: root.app_grid_width;
+            height: root.app_grid_height;
+            x: (parent.width - self.width) / 2;
+            y: parent.height > self.height ? (parent.height - self.height) / 2 : 0px;
+            spacing-vertical: root.app_grid_spacing;
+            spacing-horizontal: root.app_grid_spacing;
+
+            AppIcon { row: 0; col: 0; width: root.app_icon_width; height: root.app_icon_height; label: "Почта"; tint: #2f79c8; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+            AppIcon { row: 0; col: 1; width: root.app_icon_width; height: root.app_icon_height; label: "Чат"; tint: #1e9b7b; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+            AppIcon { row: 0; col: 2; width: root.app_icon_width; height: root.app_icon_height; label: "Терминал"; tint: #b85f3f; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+            AppIcon { row: 1; col: 0; width: root.app_icon_width; height: root.app_icon_height; label: "Музыка"; tint: #6c5bd4; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+            AppIcon { row: 1; col: 1; width: root.app_icon_width; height: root.app_icon_height; label: "Радио"; tint: #d6a53a; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+            AppIcon { row: 1; col: 2; width: root.app_icon_width; height: root.app_icon_height; label: "Настройки"; tint: #4c9bb1; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+            AppIcon { row: 2; col: 0; width: root.app_icon_width; height: root.app_icon_height; label: "Калькулятор"; tint: #2f8a9f; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+            AppIcon { row: 2; col: 1; width: root.app_icon_width; height: root.app_icon_height; label: "Монитор"; tint: #8f4dbd; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+            AppIcon { row: 2; col: 2; width: root.app_icon_width; height: root.app_icon_height; label: "Система"; tint: #3b7a4a; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+        }
+
+        viewport-height: app_grid.height;
+        viewport-width: app_grid.width;
+    }
+}

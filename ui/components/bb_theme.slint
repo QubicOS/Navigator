@@ -1,0 +1,52 @@
+export enum ThemeMode {
+    Light,
+    Dark,
+}
+
+export global BbTheme {
+    in-out property <ThemeMode> mode: ThemeMode.Light;
+
+    in property <color> light_accent: #C15F3C;
+    in property <color> light_cloudy: #B1ADA1;
+    in property <color> light_pampas: #F4F3EE;
+    in property <color> light_white: #FFFFFF;
+
+    in property <color> dark_black: #070a0e;
+    in property <color> dark_blue_1: #0b1a29;
+    in property <color> dark_blue_2: #10273a;
+    in property <color> dark_cyan: #2aa6ff;
+
+    in property <color> window_bg: mode == ThemeMode.Light ? light_pampas : dark_black;
+    in property <color> surface_bg: mode == ThemeMode.Light ? light_white : dark_blue_1;
+    in property <color> surface_bg_2: mode == ThemeMode.Light ? light_pampas : dark_blue_2;
+    in property <color> border: mode == ThemeMode.Light ? light_cloudy : #203244;
+    in property <color> accent: mode == ThemeMode.Light ? light_accent : dark_cyan;
+    in property <color> accent_2: mode == ThemeMode.Light ? #d87955 : #44c7ff;
+
+    in property <color> text: mode == ThemeMode.Light ? #111111 : #e8f4ff;
+    in property <color> text_dim: mode == ThemeMode.Light ? #4c4a46 : #9ab0c6;
+    in property <color> text_muted: mode == ThemeMode.Light ? #6a665f : #6f8599;
+    in property <color> on_accent: mode == ThemeMode.Light ? light_white : #03121d;
+
+    in property <color> focus_ring: mode == ThemeMode.Light ? #C15F3C88 : #2aa6ff88;
+    in property <color> shadow: mode == ThemeMode.Light ? #00000022 : #00000066;
+    in property <color> scrim: mode == ThemeMode.Light ? #00000024 : #00000070;
+
+    in property <length> gutter: 8px;
+    in property <length> radius_sm: 6px;
+    in property <length> radius_md: 10px;
+    in property <length> radius_lg: 14px;
+    in property <length> status_bar_height: 24px;
+
+    in property <duration> anim_fast: 120ms;
+    in property <duration> anim_med: 200ms;
+    in property <duration> anim_slow: 320ms;
+
+    in property <string> font_sans: "DejaVu Sans";
+    in property <string> font_mono: "DejaVu Sans Mono";
+    in property <length> font_xs: 9px;
+    in property <length> font_sm: 10px;
+    in property <length> font_md: 11px;
+    in property <length> font_lg: 12px;
+    in property <length> font_xl: 14px;
+}

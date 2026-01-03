@@ -1,0 +1,44 @@
+export component AppIcon {
+    // Icon label displayed below the tile.
+    in property <string> label;
+    // Accent tint for the tile background.
+    in property <color> tint;
+    // App icon asset.
+    in property <image> icon;
+    // Activation callback for the parent grid.
+    callback activated(string);
+
+    width: 68px;
+    height: 54px;
+    property <length> label-height: 12px;
+    property <length> tile-size: min(root.width, root.height - root.label-height - 2px);
+
+    TouchArea {
+        width: parent.width;
+        height: parent.height;
+        clicked => { root.activated(label); }
+
+        Image {
+            source: icon;
+            width: root.tile-size;
+            height: root.tile-size;
+            x: (parent.width - self.width) / 2;
+            y: parent.pressed ? 2px : 0px;
+            image-fit: contain;
+            animate y { duration: 90ms; easing: ease-in-out; }
+            animate opacity { duration: 90ms; }
+            opacity: parent.pressed ? 0.85 : 1;
+        }
+
+        Text {
+            text: label;
+            y: parent.height - root.label-height + (parent.pressed ? 2px : 0px);
+            width: parent.width;
+            height: root.label-height;
+            horizontal-alignment: center;
+            font-size: 9px;
+            color: #e8f2ff;
+            animate y { duration: 90ms; easing: ease-in-out; }
+        }
+    }
+}

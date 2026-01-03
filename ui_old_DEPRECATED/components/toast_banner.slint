@@ -1,0 +1,28 @@
+export component ToastBanner inherits Rectangle {
+    // Toast text and visibility from Rust.
+    in property <string> text;
+    in property <bool> show;
+    // Layout positions controlled by the parent.
+    in property <length> shown_y: 0px;
+    in property <length> hidden_y: 0px;
+
+    visible: root.show;
+    y: root.show ? root.shown_y : root.hidden_y;
+    border-radius: 6px;
+    background: #14273a;
+    border-width: 1px;
+    border-color: #2a4b66;
+    opacity: root.show ? 1 : 0;
+    animate y { duration: 160ms; easing: ease-in-out; }
+    animate opacity { duration: 140ms; }
+
+    Text {
+        text: root.text;
+        color: #e8f2ff;
+        font-size: 11px;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+        width: parent.width;
+        height: parent.height;
+    }
+}

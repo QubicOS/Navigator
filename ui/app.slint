@@ -1,0 +1,48 @@
+import { Theme } from "components/theme.slint";
+import { StatusBar } from "components/status_bar.slint";
+
+export component AppWindow inherits Window {
+    min-width: 320px;
+    min-height: 240px;
+    title: "BlackBerry UI";
+    default-font-family: Theme.font_sans;
+
+    // Keep these for Rust wiring (even if UI is empty for now).
+    in-out property <string> time_text: "12:45";
+    in-out property <string> date_text: "Вт, 12 мар";
+    in-out property <string> toast_text;
+    in-out property <bool> toast_visible: false;
+    callback open_app(string);
+
+    background: Theme.window_bg;
+
+    StatusBar {
+        x: 0px;
+        y: 0px;
+        width: parent.width;
+        height: Theme.status_bar_height;
+        date_text: root.date_text;
+        time_text: root.time_text;
+        wifi_connected: true;
+        battery_percent: 100;
+    }
+
+    // Extra explicit divider to keep the boundary crisp even if StatusBar style changes.
+    Rectangle {
+        x: 0px;
+        y: Theme.status_bar_height - 1px;
+        width: parent.width;
+        height: 1px;
+        background: Theme.border;
+    }
+
+    content := Rectangle {
+        x: 0px;
+        y: Theme.status_bar_height;
+        width: parent.width;
+        height: parent.height - Theme.status_bar_height;
+        background: Theme.surface_bg;
+
+        @children
+    }
+}

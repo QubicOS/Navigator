@@ -1,0 +1,76 @@
+import { HorizontalBox } from "std-widgets.slint";
+
+export component HeaderBar inherits Rectangle {
+    // Title text from the parent window.
+    in property <string> title;
+    // Shared open/close state for the notification shade.
+    in-out property <bool> shade_open;
+
+    background: @linear-gradient(180deg, #11283d 0%, #0b1a29 100%);
+
+    // Bottom divider line.
+    Rectangle {
+        y: parent.height - 1px;
+        width: parent.width;
+        height: 1px;
+        background: #0f2a42;
+    }
+
+    // Status area on the right.
+    HorizontalBox {
+        width: parent.width;
+        height: parent.height;
+        spacing: 0px;
+
+        Rectangle {
+            width: parent.width - 68px;
+            height: parent.height;
+            clip: true;
+        }
+
+        Rectangle {
+            width: 68px;
+            height: parent.height;
+            clip: true;
+
+            HorizontalBox {
+                padding: 4px;
+                spacing: 6px;
+                x: 2px;
+                alignment: center;
+                Text { text: "3G"; color: #cbe3ff; font-size: 10px; height: parent.height; vertical-alignment: center; }
+                Text { text: "100%"; color: #cbe3ff; font-size: 10px; height: parent.height; vertical-alignment: center; }
+            }
+        }
+    }
+
+    // Window title centered in the header.
+    Text {
+        text: root.title;
+        color: #cbe3ff;
+        font-size: 11px;
+        font-weight: 600;
+        width: parent.width;
+        height: parent.height;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+
+    // Shade toggle button.
+    TouchArea {
+        x: 2px;
+        y: 2px;
+        width: 20px;
+        height: 20px;
+        clicked => { root.shade_open = !root.shade_open; }
+        Text {
+            text: root.shade_open ? "˄" : "˅";
+            color: #cbe3ff;
+            font-size: 12px;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            width: parent.width;
+            height: parent.height;
+        }
+    }
+}

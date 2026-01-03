@@ -1,0 +1,54 @@
+export component ShadeOverlay {
+    // Shared shade state from the parent window.
+    in-out property <bool> shade_open;
+    // Header height so overlay starts below the bar.
+    in property <length> header_height;
+
+    // Dimmed backdrop behind the shade.
+    Rectangle {
+        y: root.header_height;
+        width: parent.width;
+        height: parent.height - root.header_height;
+        background: #00000040;
+        opacity: root.shade_open ? 1 : 0;
+        visible: root.shade_open;
+        animate opacity { duration: 160ms; }
+    }
+
+    // Tap-to-dismiss area.
+    TouchArea {
+        x: 0px;
+        y: root.header_height;
+        width: parent.width;
+        height: parent.height - root.header_height;
+        enabled: root.shade_open;
+        clicked => { root.shade_open = false; }
+    }
+
+    // Shade panel surface.
+    Rectangle {
+        y: root.shade_open ? root.header_height : -120px;
+        width: parent.width;
+        height: 120px;
+        background: @linear-gradient(180deg, #11283d 0%, #0b1a29 100%);
+        clip: true;
+        animate y { duration: 200ms; easing: ease-in-out; }
+        animate opacity { duration: 200ms; }
+        opacity: root.shade_open ? 1 : 0;
+
+        Rectangle {
+            y: parent.height - 1px;
+            width: parent.width;
+            height: 1px;
+            background: #0f2a42;
+        }
+
+        Text {
+            x: 10px;
+            y: 32px;
+            text: "Уведомления";
+            color: #cbe3ff;
+            font-size: 12px;
+        }
+    }
+}

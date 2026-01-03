@@ -1,0 +1,60 @@
+import { HorizontalBox } from "std-widgets.slint";
+
+export component FooterBar inherits Rectangle {
+    // Button labels for the footer strip.
+    in property <string> left_text;
+    in property <string> center_text;
+    in property <string> right_text;
+
+    background: @linear-gradient(180deg, #0c1c2b 0%, #08131d 100%);
+
+    Rectangle {
+        y: 0px;
+        width: parent.width;
+        height: 1px;
+        background: #0f2a42;
+    }
+
+    HorizontalBox {
+        width: parent.width;
+        height: parent.height;
+        spacing: 0px;
+
+        Rectangle {
+            width: parent.width / 3;
+            Text {
+                x: 10px;
+                width: parent.width - 10px;
+                text: root.left_text;
+                color: #cbe3ff;
+                font-size: 11px;
+                horizontal-alignment: left;
+                vertical-alignment: center;
+                height: parent.height;
+            }
+        }
+
+        Text {
+            width: parent.width / 3;
+            text: root.center_text;
+            color: #e8f2ff;
+            font-size: 14px;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+
+        Rectangle {
+            width: parent.width / 3;
+            Text {
+                x: 0px;
+                width: parent.width - 10px;
+                text: root.right_text;
+                color: #cbe3ff;
+                font-size: 12px;
+                horizontal-alignment: right;
+                vertical-alignment: center;
+                height: parent.height;
+            }
+        }
+    }
+}

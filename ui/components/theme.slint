@@ -1,0 +1,39 @@
+import { BbTheme, ThemeMode } from "bb_theme.slint";
+
+export global Theme {
+    in-out property <ThemeMode> mode <=> BbTheme.mode;
+
+    in property <color> window_bg: BbTheme.window_bg;
+    in property <color> surface_bg: BbTheme.surface_bg;
+    in property <color> surface_bg_2: BbTheme.surface_bg_2;
+    in property <color> border: BbTheme.border;
+    in property <color> accent: BbTheme.accent;
+    in property <color> accent_2: BbTheme.accent_2;
+
+    in property <color> text: BbTheme.text;
+    in property <color> text_dim: BbTheme.text_dim;
+    in property <color> text_muted: BbTheme.text_muted;
+    in property <color> on_accent: BbTheme.on_accent;
+
+    in property <color> focus_ring: BbTheme.focus_ring;
+    in property <color> shadow: BbTheme.shadow;
+    in property <color> scrim: BbTheme.scrim;
+
+    in property <length> gutter: BbTheme.gutter;
+    in property <length> radius_sm: BbTheme.radius_sm;
+    in property <length> radius_md: BbTheme.radius_md;
+    in property <length> radius_lg: BbTheme.radius_lg;
+    in property <length> status_bar_height: BbTheme.status_bar_height;
+
+    in property <duration> anim_fast: BbTheme.anim_fast;
+    in property <duration> anim_med: BbTheme.anim_med;
+    in property <duration> anim_slow: BbTheme.anim_slow;
+
+    in property <string> font_sans: BbTheme.font_sans;
+    in property <string> font_mono: BbTheme.font_mono;
+    in property <length> font_xs: BbTheme.font_xs;
+    in property <length> font_sm: BbTheme.font_sm;
+    in property <length> font_md: BbTheme.font_md;
+    in property <length> font_lg: BbTheme.font_lg;
+    in property <length> font_xl: BbTheme.font_xl;
+}

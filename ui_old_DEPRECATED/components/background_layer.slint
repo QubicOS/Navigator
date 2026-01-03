@@ -1,0 +1,36 @@
+export component BackgroundLayer {
+    // Full-screen base gradient for the shell background.
+    Rectangle {
+        width: root.width;
+        height: root.height;
+        background: @linear-gradient(135deg, #0a1522 0%, #0c2236 55%, #08111b 100%);
+    }
+
+    // Soft ambient shapes for depth.
+    Rectangle {
+        x: -50px;
+        y: 16px;
+        width: 220px;
+        height: 140px;
+        border-radius: 90px;
+        background: #1b3b5a40;
+    }
+
+    Rectangle {
+        x: 120px;
+        y: 40px;
+        width: 240px;
+        height: 160px;
+        border-radius: 100px;
+        background: #0f2a4240;
+    }
+
+    Rectangle {
+        x: -40px;
+        y: 150px;
+        width: 220px;
+        height: 80px;
+        border-radius: 40px;
+        background: #0b1f3080;
+    }
+}

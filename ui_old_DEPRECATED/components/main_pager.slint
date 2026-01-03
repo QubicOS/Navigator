@@ -1,0 +1,52 @@
+import { HorizontalBox } from "std-widgets.slint";
+import { ClockPage } from "clock_page.slint";
+import { AppsPage } from "apps_page.slint";
+
+export component MainPager inherits Rectangle {
+    // Current page index for swipe navigation.
+    in property <int> page_index;
+    // Time/date for the clock page.
+    in property <string> time_text;
+    in property <string> date_text;
+
+    // Grid sizing for the apps page.
+    in property <length> app_icon_width;
+    in property <length> app_icon_height;
+    in property <length> app_grid_spacing;
+    in property <length> app_grid_width;
+    in property <length> app_grid_height;
+
+    // App launch callback bubble-up.
+    callback open_app(string);
+
+    Rectangle {
+        width: root.width * 2;
+        height: parent.height;
+        x: -root.page_index * root.width;
+        animate x { duration: 220ms; easing: ease-in-out; }
+
+        HorizontalBox {
+            width: parent.width;
+            height: parent.height;
+            spacing: 0px;
+
+            ClockPage {
+                width: root.width;
+                height: parent.height;
+                time_text: root.time_text;
+                date_text: root.date_text;
+            }
+
+            AppsPage {
+                width: root.width;
+                height: parent.height;
+                app_icon_width: root.app_icon_width;
+                app_icon_height: root.app_icon_height;
+                app_grid_spacing: root.app_grid_spacing;
+                app_grid_width: root.app_grid_width;
+                app_grid_height: root.app_grid_height;
+                open_app(label) => { root.open_app(label); }
+            }
+        }
+    }
+}

@@ -1,0 +1,123 @@
+import { HorizontalBox } from "std-widgets.slint";
+import { Theme } from "theme.slint";
+
+export component StatusBar inherits Rectangle {
+    in property <string> date_text: "";
+    in property <string> time_text: "";
+    in property <bool> wifi_connected: true;
+    in property <int> battery_percent: 100;
+
+    in property <length> gutter: Theme.gutter;
+
+    background: @linear-gradient(180deg, Theme.surface_bg 0%, Theme.surface_bg_2 100%);
+
+    Rectangle {
+        y: parent.height - 1px;
+        width: parent.width;
+        height: 1px;
+        background: Theme.border;
+    }
+
+    // Left cluster: date.
+    Rectangle {
+        x: root.gutter;
+        width: 140px;
+        height: parent.height;
+        clip: true;
+        background: #00000000;
+
+        Text {
+            width: parent.width;
+            height: parent.height;
+            text: root.date_text;
+            color: Theme.text_dim;
+            font-size: Theme.font_xs;
+            horizontal-alignment: left;
+            vertical-alignment: center;
+        }
+    }
+
+    // Centered time (independent from left/right widths).
+    Text {
+        x: 0px;
+        width: parent.width;
+        height: parent.height;
+        text: root.time_text;
+        color: Theme.text;
+        font-size: Theme.font_md;
+        font-weight: 700;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+
+    // Right cluster: WiFi + battery.
+    right_cluster := Rectangle {
+        x: parent.width - root.gutter - 140px;
+        width: 140px;
+        height: parent.height;
+        clip: true;
+        background: #00000000;
+
+        HorizontalBox {
+            x: 0px;
+            width: parent.width;
+            height: parent.height;
+            spacing: 6px;
+            alignment: end;
+
+            Rectangle {
+                width: 28px;
+                height: parent.height;
+                background: #00000000;
+                opacity: root.wifi_connected ? 1 : 0.45;
+
+                HorizontalBox {
+                    width: parent.width;
+                    height: parent.height;
+                    spacing: 1px;
+                    alignment: center;
+                    Rectangle { width: 3px; height: 4px; background: Theme.text_muted; border-radius: 1px; }
+                    Rectangle { width: 3px; height: 6px; background: Theme.text_dim; border-radius: 1px; }
+                    Rectangle { width: 3px; height: 8px; background: Theme.text; border-radius: 1px; }
+                    Rectangle { width: 3px; height: 10px; background: Theme.text; border-radius: 1px; }
+                }
+            }
+
+            Text {
+                text: battery_percent >= 0 ? battery_percent + "%" : "--%";
+                color: Theme.text;
+                font-size: Theme.font_xs;
+                font-weight: 600;
+                vertical-alignment: center;
+                height: parent.height;
+            }
+
+            Rectangle {
+                width: 18px;
+                height: 8px;
+                background: #00000000;
+                border-width: 1px;
+                border-color: Theme.text;
+                border-radius: 2px;
+
+                Rectangle {
+                    x: 1px;
+                    y: 1px;
+                    width: (parent.width - 4px) * max(min(battery_percent, 100), 0) / 100;
+                    height: parent.height - 4px;
+                    background: battery_percent <= 15 ? Theme.accent : Theme.text;
+                    border-radius: 1px;
+                }
+
+                Rectangle {
+                    x: parent.width;
+                    y: 2px;
+                    width: 2px;
+                    height: 4px;
+                    background: Theme.text;
+                    border-radius: 1px;
+                }
+            }
+        }
+    }
+}

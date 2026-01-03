@@ -1,0 +1,258 @@
+import { HorizontalBox } from "std-widgets.slint";
+
+export component StatusBar inherits Rectangle {
+    // Title text from the parent window.
+    in property <string> title: "";
+    // Optional status time/date from the parent window.
+    in property <string> time_text: "";
+    in property <string> date_text: "";
+    // Shared open/close state for the notification shade.
+    in-out property <bool> shade_open;
+    // Height of the top bar.
+    in property <length> bar_height: 28px;
+    // Height of the drop-down shade.
+    in property <length> shade_height: 144px;
+    // Horizontal padding for bar contents.
+    in property <length> gutter: 8px;
+
+    background: #00000000;
+
+    // Dimmed backdrop when the shade is open.
+    Rectangle {
+        y: root.bar_height;
+        width: parent.width;
+        height: parent.height - root.bar_height;
+        background: #00000070;
+        opacity: root.shade_open ? 1 : 0;
+        visible: root.shade_open;
+        animate opacity { duration: 180ms; }
+    }
+
+    // Backdrop tap-to-dismiss (placed behind the shade surface).
+    TouchArea {
+        x: 0px;
+        y: root.bar_height;
+        width: parent.width;
+        height: parent.height - root.bar_height;
+        enabled: root.shade_open;
+        clicked => { root.shade_open = false; }
+    }
+
+    // Shade panel container that animates via height (avoids negative coordinates).
+    shade_container := Rectangle {
+        y: root.bar_height;
+        width: parent.width;
+        height: root.shade_open ? root.shade_height : 0px;
+        clip: true;
+        animate height { duration: 220ms; easing: ease-in-out; }
+
+        // Shade panel surface.
+        Rectangle {
+            y: 0px;
+            width: parent.width;
+            height: root.shade_height;
+            background: @linear-gradient(180deg, #10273a 0%, #0b1a26 100%);
+            clip: true;
+
+            Rectangle {
+                y: parent.height - 1px;
+                width: parent.width;
+                height: 1px;
+                background: #0f2a42;
+            }
+
+            Text {
+                x: root.gutter;
+                y: 12px;
+                text: "Уведомления";
+                color: #cbe3ff;
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+            Text {
+                x: root.gutter;
+                y: 30px;
+                text: root.date_text;
+                color: #94b3d3;
+                font-size: 10px;
+            }
+
+            HorizontalBox {
+                x: root.gutter;
+                y: 56px;
+                width: parent.width - root.gutter * 2;
+                height: 36px;
+                spacing: 10px;
+
+                Rectangle {
+                    width: (parent.width - 20px) / 3;
+                    height: parent.height;
+                    background: #1a3a55;
+                    border-radius: 6px;
+                    Text {
+                        text: "Wi-Fi";
+                        color: #cbe3ff;
+                        font-size: 10px;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                        width: parent.width;
+                        height: parent.height;
+                    }
+                }
+
+                Rectangle {
+                    width: (parent.width - 20px) / 3;
+                    height: parent.height;
+                    background: #1a3a55;
+                    border-radius: 6px;
+                    Text {
+                        text: "Bluetooth";
+                        color: #cbe3ff;
+                        font-size: 10px;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                        width: parent.width;
+                        height: parent.height;
+                    }
+                }
+
+                Rectangle {
+                    width: (parent.width - 20px) / 3;
+                    height: parent.height;
+                    background: #1a3a55;
+                    border-radius: 6px;
+                    Text {
+                        text: "Режим";
+                        color: #cbe3ff;
+                        font-size: 10px;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                        width: parent.width;
+                        height: parent.height;
+                    }
+                }
+            }
+
+            Rectangle {
+                x: root.gutter;
+                y: 102px;
+                width: parent.width - root.gutter * 2;
+                height: 30px;
+                background: #132e45;
+                border-radius: 8px;
+                Text {
+                    x: 10px;
+                    text: "Нет новых уведомлений";
+                    color: #94b3d3;
+                    font-size: 10px;
+                    vertical-alignment: center;
+                    height: parent.height;
+                }
+            }
+        }
+    }
+
+    // Top status bar.
+    Rectangle {
+        y: 0px;
+        width: parent.width;
+        height: root.bar_height;
+        background: @linear-gradient(180deg, #11283d 0%, #0b1a29 100%);
+
+        Rectangle {
+            y: parent.height - 1px;
+            width: parent.width;
+            height: 1px;
+            background: #0f2a42;
+        }
+
+        // Centered title (independent from left/right clusters).
+        Text {
+            x: 0px;
+            width: parent.width;
+            height: parent.height;
+            text: root.title;
+            color: #cbe3ff;
+            font-size: 11px;
+            font-weight: 600;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+
+        // Left shade toggle.
+        TouchArea {
+            x: root.gutter;
+            y: 0px;
+            width: 40px;
+            height: parent.height;
+            clicked => { root.shade_open = !root.shade_open; }
+
+            Text {
+                text: root.shade_open ? "˄" : "˅";
+                color: #cbe3ff;
+                font-size: 12px;
+                horizontal-alignment: left;
+                vertical-alignment: center;
+                width: parent.width;
+                height: parent.height;
+            }
+        }
+
+        // Right status cluster (fixed width for stable layout).
+        Rectangle {
+            x: parent.width - root.gutter - 112px;
+            y: 0px;
+            width: 112px;
+            height: parent.height;
+
+            HorizontalBox {
+                width: parent.width;
+                height: parent.height;
+                spacing: 6px;
+                alignment: center;
+
+                Text {
+                    text: root.time_text;
+                    color: #cbe3ff;
+                    font-size: 10px;
+                    vertical-alignment: center;
+                    height: parent.height;
+                }
+
+                HorizontalBox {
+                    spacing: 1px;
+                    height: parent.height;
+                    alignment: center;
+                    Rectangle { width: 2px; height: 4px; background: #7fa0c5; }
+                    Rectangle { width: 2px; height: 6px; background: #8fb2d6; }
+                    Rectangle { width: 2px; height: 8px; background: #a4c3e4; }
+                    Rectangle { width: 2px; height: 10px; background: #cbe3ff; }
+                }
+
+                Rectangle {
+                    width: 18px;
+                    height: 8px;
+                    background: #00000000;
+                    border-width: 1px;
+                    border-color: #cbe3ff;
+                    Rectangle {
+                        x: 1px;
+                        y: 1px;
+                        width: 12px;
+                        height: 4px;
+                        background: #cbe3ff;
+                        border-radius: 1px;
+                    }
+                    Rectangle {
+                        x: 18px;
+                        y: 2px;
+                        width: 2px;
+                        height: 4px;
+                        background: #cbe3ff;
+                    }
+                }
+            }
+        }
+    }
+}

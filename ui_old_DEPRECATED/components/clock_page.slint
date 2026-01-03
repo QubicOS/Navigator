@@ -1,0 +1,36 @@
+import { VerticalBox } from "std-widgets.slint";
+
+export component ClockPage inherits Rectangle {
+    // Live-updated time and date from Rust.
+    in property <string> time_text;
+    in property <string> date_text;
+
+    VerticalBox {
+        width: parent.width;
+        height: parent.height;
+        padding: 0px;
+        spacing: 2px;
+        alignment: start;
+
+        Rectangle { height: 8px; }
+        Text {
+            width: parent.width;
+            height: 40px;
+            text: root.time_text;
+            color: #cbe3ff;
+            font-size: 34px;
+            font-weight: 600;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+        Text {
+            width: parent.width;
+            height: 18px;
+            text: root.date_text;
+            color: #cbe3ff;
+            font-size: 12px;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+    }
+}

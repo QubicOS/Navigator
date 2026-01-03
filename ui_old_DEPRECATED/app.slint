@@ -1,0 +1,102 @@
+import { BackgroundLayer } from "components/background_layer.slint";
+import { StatusBar } from "components/status_bar.slint";
+import { MainPager } from "components/main_pager.slint";
+import { FooterBar } from "components/footer_bar.slint";
+import { ToastBanner } from "components/toast_banner.slint";
+import { SwipeHandler } from "components/swipe_handler.slint";
+
+export component AppWindow inherits Window {
+    width: 320px;
+    height: 240px;
+    title: "MagnoliaOS TouchWiz DEMO";
+
+    // Layout metrics for reuse across components.
+    property <length> header_height: 28px;
+    property <length> footer_height: 40px;
+    property <length> app_icon_width: 88px;
+    property <length> app_icon_height: 74px;
+    property <length> app_grid_spacing: 10px;
+    property <length> app_grid_width: app_icon_width * 3 + app_grid_spacing * 2;
+    property <length> app_grid_height: app_icon_height * 3 + app_grid_spacing * 2;
+
+    // Dynamic data from Rust.
+    in-out property <string> time_text: "12:45";
+    in-out property <string> date_text: "Вт, 12 мар";
+    in-out property <string> toast_text;
+    in-out property <bool> toast_visible: false;
+    in-out property <bool> shade_open: false;
+    in-out property <int> page_index: 0;
+
+    // App launch signal for Rust.
+    callback open_app(string);
+
+    // Background layer.
+    BackgroundLayer {
+        width: parent.width;
+        height: parent.height;
+    }
+
+    // Main pager area below the header.
+    Rectangle {
+        y: root.header_height;
+        x: 0px;
+        width: parent.width;
+        height: parent.height - root.header_height - root.footer_height;
+        clip: true;
+
+        MainPager {
+            width: parent.width;
+            height: parent.height;
+            page_index: root.page_index;
+            time_text: root.time_text;
+            date_text: root.date_text;
+            app_icon_width: root.app_icon_width;
+            app_icon_height: root.app_icon_height;
+            app_grid_spacing: root.app_grid_spacing;
+            app_grid_width: root.app_grid_width;
+            app_grid_height: root.app_grid_height;
+            open_app(label) => { root.open_app(label); }
+        }
+    }
+
+    // Footer strip.
+    FooterBar {
+        y: parent.height - root.footer_height;
+        width: parent.width;
+        height: root.footer_height;
+        left_text: "Меню · Навигация";
+        center_text: "BB";
+        right_text: "Профиль";
+    }
+
+    // Toast banner for quick feedback.
+    ToastBanner {
+        text: root.toast_text;
+        show: root.toast_visible;
+        width: parent.width - 80px;
+        height: 28px;
+        x: 40px;
+        shown_y: 92px;
+        hidden_y: 80px;
+    }
+
+    // Status bar with integrated shade.
+    StatusBar {
+        width: parent.width;
+        height: parent.height;
+        bar_height: root.header_height;
+        title: root.title;
+        time_text: root.time_text;
+        date_text: root.date_text;
+        shade_open <=> root.shade_open;
+    }
+
+    // Global swipe handling for shade and paging.
+    SwipeHandler {
+        width: parent.width;
+        height: parent.height;
+        shade_open <=> root.shade_open;
+        page_index <=> root.page_index;
+        page_count: 2;
+    }
+}
