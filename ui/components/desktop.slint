@@ -65,38 +65,26 @@ export component DesktopScreen inherits Rectangle {
             height: parent.height;
             background: #00000000;
 
-            card := Rectangle {
+            Text {
                 x: Theme.gutter;
-                y: Theme.gutter;
+                y: Theme.gutter + 6px;
                 width: parent.width - Theme.gutter * 2;
-                height: 96px;
-                background: @linear-gradient(180deg, Theme.surface_bg 0%, Theme.surface_bg_2 100%);
-                border-width: 1px;
-                border-color: Theme.border;
-                border-radius: Theme.radius_lg;
-                clip: true;
+                text: root.time_text;
+                color: Theme.text;
+                font-size: 32px;
+                font-weight: 900;
+                horizontal-alignment: center;
+            }
 
-                Text {
-                    x: 0px;
-                    y: 14px;
-                    width: parent.width;
-                    text: root.time_text;
-                    color: Theme.text;
-                    font-size: 30px;
-                    font-weight: 900;
-                    horizontal-alignment: center;
-                }
-
-                Text {
-                    x: 0px;
-                    y: 54px;
-                    width: parent.width;
-                    text: root.date_text;
-                    color: Theme.text_dim;
-                    font-size: Theme.font_md;
-                    font-weight: 700;
-                    horizontal-alignment: center;
-                }
+            Text {
+                x: Theme.gutter;
+                y: Theme.gutter + 46px;
+                width: parent.width - Theme.gutter * 2;
+                text: root.date_text;
+                color: Theme.text_dim;
+                font-size: Theme.font_md;
+                font-weight: 700;
+                horizontal-alignment: center;
             }
 
             Text {
