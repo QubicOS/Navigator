@@ -20,46 +20,9 @@ export component DesktopScreen inherits Rectangle {
         clip: true;
         animate x { duration: root.reduce_motion ? 0ms : Theme.anim_med; easing: ease-in-out; }
 
-        // Center panel (main grid).
+        // Center panel (info/quick actions).
         center_panel := Rectangle {
             x: 0px;
-            y: 0px;
-            width: root.width;
-            height: parent.height;
-            background: #00000000;
-
-            Text {
-                x: Theme.gutter;
-                y: Theme.gutter;
-                text: "Меню";
-                color: Theme.text;
-                font-size: Theme.font_xl;
-                font-weight: 800;
-            }
-
-            grid := GridLayout {
-                x: Theme.gutter;
-                y: 28px;
-                width: parent.width - Theme.gutter * 2;
-                height: parent.height - 28px - Theme.gutter;
-                spacing-horizontal: 10px;
-                spacing-vertical: 10px;
-
-                property <length> tile_w: (self.width - 20px) / 3;
-                property <length> tile_h: 72px;
-
-                AppIcon { row: 0; col: 0; width: tile_w; height: tile_h; label: "Почта"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
-                AppIcon { row: 0; col: 1; width: tile_w; height: tile_h; label: "Чаты"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
-                AppIcon { row: 0; col: 2; width: tile_w; height: tile_h; label: "Календарь"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
-                AppIcon { row: 1; col: 0; width: tile_w; height: tile_h; label: "Контакты"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
-                AppIcon { row: 1; col: 1; width: tile_w; height: tile_h; label: "Браузер"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
-                AppIcon { row: 1; col: 2; width: tile_w; height: tile_h; label: "Медиа"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
-            }
-        }
-
-        // Right panel (time/date + quick apps).
-        right_panel := Rectangle {
-            x: root.width;
             y: 0px;
             width: root.width;
             height: parent.height;
@@ -109,6 +72,43 @@ export component DesktopScreen inherits Rectangle {
                 AppIcon { x: 0px; width: tile_w; height: tile_h; compact: true; label: "Настройки"; icon: @image-url("../../assets/settings.png"); activated(label) => { root.open_app(label); } }
                 AppIcon { x: (parent.width - tile_w) / 2; width: tile_w; height: tile_h; compact: true; label: "Терминал"; icon: @image-url("../../assets/terminal.png"); activated(label) => { root.open_app(label); } }
                 AppIcon { x: parent.width - tile_w; width: tile_w; height: tile_h; compact: true; label: "Приложения"; icon: @image-url("../../assets/apps.png"); activated(label) => { root.open_app(label); } }
+            }
+        }
+
+        // Right panel (apps grid).
+        right_panel := Rectangle {
+            x: root.width;
+            y: 0px;
+            width: root.width;
+            height: parent.height;
+            background: #00000000;
+
+            Text {
+                x: Theme.gutter;
+                y: Theme.gutter;
+                text: "Приложения";
+                color: Theme.text;
+                font-size: Theme.font_xl;
+                font-weight: 800;
+            }
+
+            grid := GridLayout {
+                x: Theme.gutter;
+                y: 28px;
+                width: parent.width - Theme.gutter * 2;
+                height: parent.height - 28px - Theme.gutter;
+                spacing-horizontal: 10px;
+                spacing-vertical: 10px;
+
+                property <length> tile_w: (self.width - 20px) / 3;
+                property <length> tile_h: 72px;
+
+                AppIcon { row: 0; col: 0; width: tile_w; height: tile_h; label: "Почта"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+                AppIcon { row: 0; col: 1; width: tile_w; height: tile_h; label: "Чаты"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+                AppIcon { row: 0; col: 2; width: tile_w; height: tile_h; label: "Календарь"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+                AppIcon { row: 1; col: 0; width: tile_w; height: tile_h; label: "Контакты"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+                AppIcon { row: 1; col: 1; width: tile_w; height: tile_h; label: "Браузер"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
+                AppIcon { row: 1; col: 2; width: tile_w; height: tile_h; label: "Медиа"; icon: @image-url("../../assets/unknown.png"); activated(label) => { root.open_app(label); } }
             }
         }
     }
