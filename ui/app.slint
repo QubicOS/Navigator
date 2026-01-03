@@ -1,5 +1,6 @@
 import { Theme } from "components/theme.slint";
 import { StatusBar } from "components/status_bar.slint";
+import { LockScreen } from "components/lock_screen.slint";
 
 export component AppWindow inherits Window {
     min-width: 320px;
@@ -13,6 +14,9 @@ export component AppWindow inherits Window {
     in-out property <string> toast_text;
     in-out property <bool> toast_visible: false;
     callback open_app(string);
+    in-out property <bool> locked: true;
+    in-out property <bool> reduce_motion: false;
+    in-out property <int> lock_shimmer_phase: 0;
 
     background: Theme.window_bg;
 
@@ -42,6 +46,16 @@ export component AppWindow inherits Window {
         width: parent.width;
         height: parent.height - Theme.status_bar_height;
         background: Theme.surface_bg;
+
+        LockScreen {
+            width: parent.width;
+            height: parent.height;
+            visible: root.locked;
+            time_text: root.time_text;
+            date_text: root.date_text;
+            reduce_motion: root.reduce_motion;
+            shimmer_phase: root.lock_shimmer_phase;
+        }
 
         @children
     }

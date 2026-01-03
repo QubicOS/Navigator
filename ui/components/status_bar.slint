@@ -1,4 +1,3 @@
-import { HorizontalBox } from "std-widgets.slint";
 import { Theme } from "theme.slint";
 
 export component StatusBar inherits Rectangle {
@@ -8,6 +7,11 @@ export component StatusBar inherits Rectangle {
     in property <int> battery_percent: 100;
 
     in property <length> gutter: Theme.gutter;
+    in property <length> right_cluster_width: 140px;
+    in property <length> right_text_width: 44px;
+    in property <length> right_gap: 6px;
+    in property <length> wifi_width: 26px;
+    in property <length> wifi_height: 12px;
 
     background: @linear-gradient(180deg, Theme.surface_bg 0%, Theme.surface_bg_2 100%);
 
@@ -52,72 +56,36 @@ export component StatusBar inherits Rectangle {
 
     // Right cluster: WiFi + battery.
     right_cluster := Rectangle {
-        x: parent.width - root.gutter - 140px;
-        width: 140px;
+        x: parent.width - root.gutter - root.right_cluster_width;
+        width: root.right_cluster_width;
         height: parent.height;
         clip: true;
         background: #00000000;
 
-        HorizontalBox {
-            x: 0px;
-            width: parent.width;
+        battery_text := Text {
+            x: parent.width - root.right_text_width;
+            width: root.right_text_width;
             height: parent.height;
-            spacing: 6px;
-            alignment: end;
+            text: battery_percent >= 0 ? battery_percent + "%" : "--%";
+            color: Theme.text;
+            font-size: Theme.font_xs;
+            font-weight: 600;
+            horizontal-alignment: right;
+            vertical-alignment: center;
+        }
 
-            Rectangle {
-                width: 28px;
-                height: parent.height;
-                background: #00000000;
-                opacity: root.wifi_connected ? 1 : 0.45;
+        wifi := Rectangle {
+            x: parent.width - root.right_text_width - root.right_gap - root.wifi_width;
+            y: (parent.height - root.wifi_height) * 0.5;
+            width: root.wifi_width;
+            height: root.wifi_height;
+            background: #00000000;
+            opacity: root.wifi_connected ? 1 : 0.35;
 
-                HorizontalBox {
-                    width: parent.width;
-                    height: parent.height;
-                    spacing: 1px;
-                    alignment: center;
-                    Rectangle { width: 3px; height: 4px; background: Theme.text_muted; border-radius: 1px; }
-                    Rectangle { width: 3px; height: 6px; background: Theme.text_dim; border-radius: 1px; }
-                    Rectangle { width: 3px; height: 8px; background: Theme.text; border-radius: 1px; }
-                    Rectangle { width: 3px; height: 10px; background: Theme.text; border-radius: 1px; }
-                }
-            }
-
-            Text {
-                text: battery_percent >= 0 ? battery_percent + "%" : "--%";
-                color: Theme.text;
-                font-size: Theme.font_xs;
-                font-weight: 600;
-                vertical-alignment: center;
-                height: parent.height;
-            }
-
-            Rectangle {
-                width: 18px;
-                height: 8px;
-                background: #00000000;
-                border-width: 1px;
-                border-color: Theme.text;
-                border-radius: 2px;
-
-                Rectangle {
-                    x: 1px;
-                    y: 1px;
-                    width: (parent.width - 4px) * max(min(battery_percent, 100), 0) / 100;
-                    height: parent.height - 4px;
-                    background: battery_percent <= 15 ? Theme.accent : Theme.text;
-                    border-radius: 1px;
-                }
-
-                Rectangle {
-                    x: parent.width;
-                    y: 2px;
-                    width: 2px;
-                    height: 4px;
-                    background: Theme.text;
-                    border-radius: 1px;
-                }
-            }
+            Rectangle { x: 0px; y: parent.height - 4px; width: 3px; height: 4px; background: Theme.text_muted; border-radius: 1px; }
+            Rectangle { x: 5px; y: parent.height - 6px; width: 3px; height: 6px; background: Theme.text_dim; border-radius: 1px; }
+            Rectangle { x: 10px; y: parent.height - 8px; width: 3px; height: 8px; background: Theme.text; border-radius: 1px; }
+            Rectangle { x: 15px; y: parent.height - 10px; width: 3px; height: 10px; background: Theme.text; border-radius: 1px; }
         }
     }
 }
