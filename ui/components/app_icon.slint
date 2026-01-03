@@ -7,50 +7,46 @@ export component AppIcon inherits Rectangle {
 
     callback activated(string);
 
-    border-width: 1px;
-    border-color: Theme.border;
-    border-radius: Theme.radius_md;
-    background: @linear-gradient(180deg, Theme.surface_bg 0%, Theme.surface_bg_2 100%);
+    background: #00000000;
     clip: true;
 
+    out property <bool> pressed: false;
+
+    // Subtle press feedback (no card/background).
     Rectangle {
-        x: 1px;
-        y: 1px;
-        width: parent.width - 2px;
-        height: parent.height * 0.45;
-        background: #ffffff10;
-        border-radius: Theme.radius_md - 1px;
-        opacity: 0.9;
+        x: (parent.width - 46px) / 2;
+        y: root.compact ? 6px : 8px;
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        background: Theme.focus_ring;
+        opacity: root.pressed ? 1.0 : 0.0;
+        animate opacity { duration: Theme.anim_fast; }
     }
 
     Image {
-        x: (parent.width - (root.compact ? 20px : 26px)) / 2;
+        property <length> img_size: root.compact ? 34px : 42px;
+        x: (parent.width - self.img_size) / 2;
         y: root.compact ? 8px : 10px;
-        width: root.compact ? 20px : 26px;
-        height: self.width;
+        width: self.img_size;
+        height: self.img_size;
         source: root.icon;
         image-fit: contain;
+        opacity: root.pressed ? 0.85 : 1.0;
+        animate opacity { duration: Theme.anim_fast; }
     }
 
     Text {
         x: 6px;
-        y: parent.height - (root.compact ? 16px : 18px);
+        y: parent.height - (root.compact ? 18px : 20px);
         width: parent.width - 12px;
-        height: root.compact ? 12px : 14px;
+        height: root.compact ? 14px : 16px;
         text: root.label;
-        color: Theme.text;
+        color: Theme.text_dim;
         font-size: root.compact ? Theme.font_xs : Theme.font_sm;
-        font-weight: 700;
+        font-weight: 500;
         horizontal-alignment: center;
         vertical-alignment: center;
-    }
-
-    pressed_overlay := Rectangle {
-        width: parent.width;
-        height: parent.height;
-        background: Theme.focus_ring;
-        opacity: 0.0;
-        animate opacity { duration: Theme.anim_fast; }
     }
 
     TouchArea {
@@ -59,12 +55,11 @@ export component AppIcon inherits Rectangle {
         pointer-event(event) => {
             if (event.button != PointerEventButton.left) { return; }
             if (event.kind == PointerEventKind.down) {
-                pressed_overlay.opacity = 1.0;
+                root.pressed = true;
             } else if (event.kind == PointerEventKind.up || event.kind == PointerEventKind.cancel) {
-                pressed_overlay.opacity = 0.0;
+                root.pressed = false;
             }
         }
         clicked => { root.activated(root.label); }
     }
 }
-

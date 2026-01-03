@@ -50,18 +50,9 @@ export component DesktopScreen inherits Rectangle {
                 horizontal-alignment: center;
             }
 
-            Text {
-                x: Theme.gutter;
-                y: 118px;
-                text: "Быстро";
-                color: Theme.text_muted;
-                font-size: Theme.font_sm;
-                font-weight: 700;
-            }
-
             quick := Rectangle {
                 x: Theme.gutter;
-                y: 138px;
+                y: 118px;
                 width: parent.width - Theme.gutter * 2;
                 height: 84px;
                 background: #00000000;
