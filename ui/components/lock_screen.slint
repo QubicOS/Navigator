@@ -1,0 +1,121 @@
+import { VerticalBox } from "std-widgets.slint";
+import { Theme } from "theme.slint";
+
+export component LockScreen inherits Rectangle {
+    in property <string> time_text: "";
+    in property <string> date_text: "";
+    in property <bool> reduce_motion: false;
+    in property <int> shimmer_phase: 0;
+
+    background: Theme.surface_bg;
+
+    // Centered time + date.
+    VerticalBox {
+        x: 0px;
+        y: 0px;
+        width: parent.width;
+        height: parent.height;
+        alignment: center;
+        spacing: 6px;
+
+        Text {
+            text: root.time_text;
+            color: Theme.text;
+            font-size: Theme.lock_time_font;
+            font-weight: 800;
+            horizontal-alignment: center;
+            width: parent.width;
+        }
+
+        Text {
+            text: root.date_text;
+            color: Theme.text_dim;
+            font-size: Theme.lock_date_font;
+            font-weight: 600;
+            horizontal-alignment: center;
+            width: parent.width;
+        }
+    }
+
+    // Bottom hint with shimmer.
+    hint_area := Rectangle {
+        x: 0px;
+        width: parent.width;
+        height: 28px;
+        y: parent.height - Theme.gutter - self.height;
+        background: #00000000;
+
+        base_hint := Text {
+            width: parent.width;
+            height: parent.height;
+            text: "Смахните вверх для разблокировки";
+            color: Theme.text_muted;
+            font-size: Theme.lock_hint_font;
+            font-weight: 600;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+
+        // A narrow clip window revealing an accent-colored copy of the text.
+        // This creates a "shimmer" sweep without requiring masking/blend modes.
+        shimmer_clip := Rectangle {
+            y: 0px;
+            height: parent.height;
+            width: 120px;
+            clip: true;
+            background: #00000000;
+            opacity: root.reduce_motion ? 0.0 : (Math.mod(root.shimmer_phase, 2) == 0 ? 0.0 : 1.0);
+
+            // Outer (soft) glow band.
+            outer_band := Rectangle {
+                x: 0px;
+                y: 0px;
+                width: parent.width;
+                height: parent.height;
+                clip: true;
+                background: #00000000;
+                opacity: 0.45;
+
+                Text {
+                    // Keep the shimmer text aligned in the same coordinate space as base_hint.
+                    x: -shimmer_clip.x;
+                    width: hint_area.width;
+                    height: parent.height;
+                    text: base_hint.text;
+                    color: Theme.accent_2;
+                    font-size: Theme.lock_hint_font;
+                    font-weight: 700;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+
+            // Inner (bright) highlight band.
+            inner_band := Rectangle {
+                x: (parent.width - 46px) / 2;
+                y: 0px;
+                width: 46px;
+                height: parent.height;
+                clip: true;
+                background: #00000000;
+
+                Text {
+                    x: -(shimmer_clip.x + inner_band.x);
+                    width: hint_area.width;
+                    height: parent.height;
+                    text: base_hint.text;
+                    color: Theme.accent;
+                    font-size: Theme.lock_hint_font;
+                    font-weight: 800;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+
+            // Odd phase: sweep left -> right (visible). Even phase: reset to start (hidden).
+            x: root.reduce_motion ? -self.width : (Math.mod(root.shimmer_phase, 2) == 0 ? -self.width : parent.width);
+            animate x { duration: Theme.lock_shimmer_period; easing: linear; }
+            animate opacity { duration: Theme.anim_fast; }
+        }
+    }
+}
