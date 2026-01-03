@@ -1,0 +1,334 @@
+import { Theme } from "theme.slint";
+
+component ShadeToggle inherits Rectangle {
+    in property <string> label: "";
+    in-out property <bool> enabled: false;
+    in property <length> tile_width: 80px;
+    in property <bool> reduce_motion: false;
+    out property <bool> pressed: false;
+
+    width: root.tile_width;
+    height: 36px;
+    border-width: 1px;
+    border-color: root.enabled ? Theme.accent_2 : Theme.border;
+    border-radius: Theme.radius_sm;
+    background: root.enabled
+        ? @linear-gradient(180deg, Theme.accent 0%, Theme.accent_2 100%)
+        : @linear-gradient(180deg, Theme.surface_bg 0%, Theme.surface_bg_2 100%);
+
+    Text {
+        width: parent.width;
+        height: parent.height;
+        text: root.label;
+        color: root.enabled ? Theme.on_accent : Theme.text;
+        font-size: Theme.font_sm;
+        font-weight: 700;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+
+    TouchArea {
+        width: parent.width;
+        height: parent.height;
+        pointer-event(event) => {
+            if (event.button != PointerEventButton.left) {
+                return;
+            }
+            if (event.kind == PointerEventKind.down) {
+                root.pressed = true;
+            } else if (event.kind == PointerEventKind.up || event.kind == PointerEventKind.cancel) {
+                root.pressed = false;
+            }
+        }
+        clicked => { root.enabled = !root.enabled; }
+    }
+
+    // Press feedback (no scale property in Slint 1.14).
+    Rectangle {
+        x: 0px;
+        y: 0px;
+        width: parent.width;
+        height: parent.height;
+        background: #ffffff14;
+        opacity: root.pressed ? 1.0 : 0.0;
+        animate opacity { duration: root.reduce_motion ? 0ms : Theme.anim_fast; easing: ease-out; }
+    }
+
+    animate background { duration: root.reduce_motion ? 0ms : Theme.anim_fast; }
+    animate border-color { duration: root.reduce_motion ? 0ms : Theme.anim_fast; }
+}
+
+component ShadeSlider inherits Rectangle {
+    in property <string> label: "";
+    in property <bool> enabled: true;
+    in property <float> minimum: 0;
+    in property <float> maximum: 100;
+    in property <float> step: 1;
+    in-out property <float> value: 70;
+
+    in property <length> tile_width: 80px;
+    in property <length> tile_height: 44px;
+    in property <bool> reduce_motion: false;
+    out property <bool> pressed: false;
+
+    width: root.tile_width;
+    height: root.tile_height;
+
+    border-width: 1px;
+    border-color: Theme.border;
+    border-radius: Theme.radius_sm;
+    background: @linear-gradient(180deg, Theme.surface_bg 0%, Theme.surface_bg_2 100%);
+    clip: true;
+
+    Text {
+        x: 8px;
+        y: 6px;
+        width: parent.width - 16px;
+        text: root.label;
+        color: Theme.text;
+        font-size: Theme.font_sm;
+        font-weight: 700;
+    }
+
+    track := Rectangle {
+        x: 8px;
+        y: parent.height - 14px;
+        width: parent.width - 16px;
+        height: 4px;
+        background: Theme.border;
+        border-radius: 2px;
+        opacity: root.enabled ? 1 : 0.5;
+
+        fill := Rectangle {
+            x: 0px;
+            y: 0px;
+            width: parent.width * (root.value - root.minimum) / max(root.maximum - root.minimum, 1);
+            height: parent.height;
+            background: Theme.accent;
+            border-radius: parent.border-radius;
+            animate width { duration: root.reduce_motion ? 0ms : Theme.anim_fast; easing: ease-out; }
+        }
+    }
+
+    thumb := Rectangle {
+        property <length> base_size: 12px;
+        property <length> pressed_size: 14px;
+        width: root.pressed ? pressed_size : base_size;
+        height: self.width;
+        border-radius: self.width / 2;
+        y: track.y - (self.height - track.height) / 2;
+        background: Theme.accent;
+        opacity: root.enabled ? 1 : 0.5;
+        x: track.x + clamp(track.width * (root.value - root.minimum) / max(root.maximum - root.minimum, 1) - self.width / 2, 0px, track.width - self.width);
+        animate x { duration: root.reduce_motion ? 0ms : Theme.anim_fast; easing: ease-out; }
+        animate background { duration: root.reduce_motion ? 0ms : Theme.anim_fast; }
+        animate width { duration: root.reduce_motion ? 0ms : Theme.anim_fast; easing: ease-out; }
+    }
+
+    function set-value(v: float) {
+        let snapped = root.step > 0 ? (round((v - root.minimum) / root.step) * root.step + root.minimum) : v;
+        root.value = max(root.minimum, min(root.maximum, snapped));
+    }
+
+    touch := TouchArea {
+        enabled: root.enabled;
+        width: parent.width;
+        height: parent.height;
+        pointer-event(event) => {
+            if (event.button != PointerEventButton.left) {
+                return;
+            }
+            if (event.kind == PointerEventKind.up) {
+                root.pressed = false;
+                return;
+            }
+            if (event.kind == PointerEventKind.down) {
+                root.pressed = true;
+            }
+            root.set-value(root.minimum + (touch.mouse-x - track.x) * (root.maximum - root.minimum) / max(track.width, 1px));
+        }
+        moved => {
+            if (!self.enabled) { return; }
+            root.set-value(root.minimum + (touch.mouse-x - track.x) * (root.maximum - root.minimum) / max(track.width, 1px));
+        }
+    }
+}
+
+export component NotificationShade inherits Rectangle {
+    in-out property <bool> shade_open: false;
+    in property <bool> reduce_motion: false;
+    in property <length> shade_height: Theme.shade_height;
+    in property <string> time_text: "";
+    in property <string> date_text: "";
+
+    property <bool> dragging: false;
+    property <length> drag_height: 0px;
+    property <length> target_height: dragging ? drag_height : (shade_open ? shade_height : 0px);
+
+    background: #00000000;
+
+    // Scrim over content (tap to dismiss).
+    Rectangle {
+        x: 0px;
+        y: Theme.status_bar_height;
+        width: parent.width;
+        height: parent.height - Theme.status_bar_height;
+        background: Theme.scrim;
+        visible: panel_container.height > 0px;
+        opacity: panel_container.height > 0px ? 1.0 : 0.0;
+        animate opacity { duration: root.reduce_motion ? 0ms : Theme.anim_fast; }
+    }
+
+    TouchArea {
+        x: 0px;
+        y: Theme.status_bar_height;
+        width: parent.width;
+        height: parent.height - Theme.status_bar_height;
+        enabled: panel_container.height > 0px;
+        clicked => { root.shade_open = false; }
+    }
+
+    // Panel container animates via height (stable and avoids negative coordinates).
+    panel_container := Rectangle {
+        x: 0px;
+        y: Theme.status_bar_height;
+        width: parent.width;
+        height: root.target_height;
+        clip: true;
+        background: #00000000;
+        animate height { duration: (root.reduce_motion || root.dragging) ? 0ms : Theme.anim_med; easing: ease-in-out; }
+
+        Rectangle {
+            x: 0px;
+            y: 0px;
+            width: parent.width;
+            height: root.shade_height;
+            background: @linear-gradient(180deg, Theme.surface_bg 0%, Theme.surface_bg_2 100%);
+
+            // Close gesture + drag-follow (keep it only on the header area so controls remain clickable).
+            SwipeGestureHandler {
+                x: 0px;
+                y: 0px;
+                width: parent.width;
+                height: 52px;
+                enabled: root.shade_open;
+                handle-swipe-up: true;
+
+                moved => {
+                    if (self.swiping) {
+                        root.dragging = true;
+                        root.drag_height = min(
+                            max(root.shade_height + (self.current-position.y - self.pressed-position.y), 0px),
+                            root.shade_height
+                        );
+                    }
+                }
+
+                swiped => {
+                    root.dragging = false;
+                    root.shade_open = root.drag_height > (root.shade_height / 2);
+                    root.drag_height = root.shade_open ? root.shade_height : 0px;
+                }
+            }
+
+            Rectangle {
+                y: parent.height - 1px;
+                width: parent.width;
+                height: 1px;
+                background: Theme.border;
+            }
+
+            // Drag handle.
+            Rectangle {
+                x: (parent.width - 44px) / 2;
+                y: 8px;
+                width: 44px;
+                height: 4px;
+                border-radius: 2px;
+                background: Theme.border;
+                opacity: 0.75;
+            }
+
+            // Header.
+            Text {
+                x: Theme.gutter;
+                y: 18px;
+                text: "Уведомления";
+                color: Theme.text;
+                font-size: Theme.font_lg;
+                font-weight: 800;
+            }
+
+            Text {
+                x: Theme.gutter;
+                y: 38px;
+                text: root.date_text;
+                color: Theme.text_dim;
+                font-size: Theme.font_sm;
+                font-weight: 600;
+            }
+
+            // Quick toggles (UI-only for now).
+            toggles := Rectangle {
+                x: Theme.gutter;
+                y: 60px;
+                width: parent.width - Theme.gutter * 2;
+                height: 44px;
+                background: #00000000;
+
+                property <length> tile_w: (self.width - 20px) / 3;
+
+                ShadeToggle { x: 0px; width: tile_w; height: parent.height; tile_width: tile_w; label: "Wi‑Fi"; enabled: true; reduce_motion: root.reduce_motion; }
+                ShadeToggle { x: (parent.width - tile_w) / 2; width: tile_w; height: parent.height; tile_width: tile_w; label: "BT"; enabled: false; reduce_motion: root.reduce_motion; }
+                ShadeSlider { x: parent.width - tile_w; tile_width: tile_w; tile_height: parent.height; label: "Звук"; value: 70; reduce_motion: root.reduce_motion; }
+            }
+
+            // Empty state placeholder.
+            Rectangle {
+                x: Theme.gutter;
+                y: 116px;
+                width: parent.width - Theme.gutter * 2;
+                height: 44px;
+                background: Theme.surface_bg;
+                border-width: 1px;
+                border-color: Theme.border;
+                border-radius: Theme.radius_md;
+
+                Text {
+                    width: parent.width;
+                    height: parent.height;
+                    text: "Нет новых уведомлений";
+                    color: Theme.text_muted;
+                    font-size: Theme.font_sm;
+                    font-weight: 600;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+        }
+    }
+
+    // Gesture: swipe down from the status-bar region to open.
+    SwipeGestureHandler {
+        x: 0px;
+        y: 0px;
+        width: parent.width;
+        height: Theme.status_bar_height;
+        handle-swipe-down: true;
+
+        moved => {
+            if (self.swiping) {
+                root.dragging = true;
+                root.drag_height = min(max(self.current-position.y - self.pressed-position.y, 0px), root.shade_height);
+            }
+        }
+
+        swiped => {
+            root.dragging = false;
+            root.shade_open = root.drag_height > (root.shade_height / 2);
+            root.drag_height = root.shade_open ? root.shade_height : 0px;
+        }
+    }
+
+    // Gesture: swipe up on the shade panel to close.
+}
