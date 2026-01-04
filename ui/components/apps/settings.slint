@@ -52,13 +52,31 @@ component IosRowBase inherits Rectangle {
     in property <bool> reduce_motion: false;
     in property <bool> show_icon: false;
     in property <image> icon;
+    in property <bool> multiline: false;
 
-    height: 44px;
+    callback activated();
+
+    height: root.multiline ? 52px : 44px;
     background: #00000000;
 
     property <length> left_inset: show_icon ? 44px : 12px;
     property <length> right_inset: show_chevron ? 24px : 12px;
     property <length> trailing_gap: 8px;
+
+    touch := TouchArea {
+        width: parent.width;
+        height: parent.height;
+        clicked => { root.activated(); }
+    }
+
+    // iOS-like press highlight.
+    Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: #00000008;
+        opacity: touch.pressed ? 1.0 : 0.0;
+        animate opacity { duration: root.reduce_motion ? 0ms : Theme.anim_fast; easing: ease-out; }
+    }
 
     if (root.show_icon) : Rectangle {
         x: 12px;
@@ -92,7 +110,7 @@ component IosRowBase inherits Rectangle {
             font-size: Theme.font_sm;
             font-weight: 600;
             vertical-alignment: center;
-            wrap: no-wrap;
+            wrap: root.multiline ? word-wrap : no-wrap;
         }
     }
 
@@ -476,20 +494,20 @@ export component SettingsApp inherits Rectangle {
                         x: 0px;
                         y: 136px;
                         width: parent.width;
-                        height: 88px;
+                        height: 96px;
 
-                        IosRowBase { y: 0px; width: parent.width; title: "Язык"; show_value: true; value_text: "Русский"; show_divider: true; }
-                        IosRowBase { y: 44px; width: parent.width; title: "Дата и время"; show_value: true; value_text: "Авто"; show_divider: false; }
+                        IosRowBase { y: 0px; width: parent.width; title: "Язык"; show_value: true; value_text: "Русский"; show_divider: true; activated => {}; }
+                        IosRowBase { y: 44px; width: parent.width; title: "Дата и время"; multiline: true; show_value: true; value_text: "Авто"; show_divider: false; activated => {}; }
                     }
 
-                    IosSectionTitle { x: 0px; y: 236px; title: "ИНФОРМАЦИЯ"; }
+                    IosSectionTitle { x: 0px; y: 244px; title: "ИНФОРМАЦИЯ"; }
                     IosCard {
                         x: 0px;
-                        y: 250px;
+                        y: 258px;
                         width: parent.width;
                         height: 44px;
 
-                        IosRowBase { y: 0px; width: parent.width; title: "О системе"; show_value: false; show_divider: false; }
+                        IosRowBase { y: 0px; width: parent.width; title: "О системе"; show_value: false; show_divider: false; activated => {}; }
                     }
                 }
 
