@@ -1,5 +1,163 @@
 import { Theme } from "../theme.slint";
 
+component IosSectionTitle inherits Text {
+    in property <string> title: "";
+    text: root.title;
+    color: Theme.text_muted;
+    font-size: Theme.font_xs;
+    font-weight: 700;
+}
+
+component IosCard inherits Rectangle {
+    background: Theme.surface_bg;
+    border-width: 1px;
+    border-color: Theme.border;
+    border-radius: Theme.radius_md;
+    clip: true;
+}
+
+component IosSwitch inherits Rectangle {
+    in-out property <bool> value: false;
+    in property <bool> reduce_motion: false;
+
+    width: 50px;
+    height: 28px;
+    border-radius: self.height / 2;
+    background: root.value ? Theme.accent : Theme.border;
+    animate background { duration: root.reduce_motion ? 0ms : Theme.anim_fast; }
+
+    thumb := Rectangle {
+        width: 22px;
+        height: 22px;
+        border-radius: self.height / 2;
+        background: Theme.surface_bg;
+        y: 3px;
+        x: root.value ? parent.width - self.width - 3px : 3px;
+        animate x { duration: root.reduce_motion ? 0ms : Theme.anim_fast; easing: ease-out; }
+    }
+
+    TouchArea {
+        width: parent.width;
+        height: parent.height;
+        clicked => { root.value = !root.value; }
+    }
+}
+
+component IosRowBase inherits Rectangle {
+    in property <string> title: "";
+    in property <string> value_text: "";
+    in property <bool> show_value: false;
+    in property <bool> show_chevron: true;
+    in property <bool> show_divider: true;
+    in property <bool> reduce_motion: false;
+    in property <bool> show_icon: false;
+    in property <image> icon;
+
+    height: 44px;
+    background: #00000000;
+
+    property <length> left_inset: show_icon ? 44px : 12px;
+    property <length> right_inset: show_chevron ? 24px : 12px;
+
+    if (root.show_icon) : Rectangle {
+        x: 12px;
+        y: 0px;
+        width: 26px;
+        height: parent.height;
+        background: #00000000;
+        Image {
+            x: (parent.width - 18px) / 2;
+            y: (parent.height - 18px) / 2;
+            width: 18px;
+            height: 18px;
+            source: root.icon;
+            image-fit: contain;
+        }
+    }
+
+    Text {
+        x: root.left_inset;
+        width: parent.width - root.left_inset - 100px;
+        height: parent.height;
+        text: root.title;
+        color: Theme.text;
+        font-size: Theme.font_sm;
+        font-weight: 600;
+        vertical-alignment: center;
+    }
+
+    if (root.show_value) : Text {
+        x: 0px;
+        width: parent.width - root.right_inset;
+        height: parent.height;
+        text: root.value_text;
+        color: Theme.text_dim;
+        font-size: Theme.font_sm;
+        font-weight: 600;
+        horizontal-alignment: right;
+        vertical-alignment: center;
+    }
+
+    if (root.show_chevron) : Text {
+        x: parent.width - 16px;
+        y: 0px;
+        width: 12px;
+        height: parent.height;
+        text: "›";
+        color: Theme.text_muted;
+        font-size: 18px;
+        font-weight: 700;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+
+    if (root.show_divider) : Rectangle {
+        x: root.left_inset;
+        y: parent.height - 1px;
+        width: parent.width - root.left_inset;
+        height: 1px;
+        background: Theme.border;
+        opacity: 0.85;
+    }
+}
+
+component IosSwitchRow inherits Rectangle {
+    in property <string> title: "";
+    in-out property <bool> value: false;
+    in property <bool> show_divider: true;
+    in property <bool> reduce_motion: false;
+
+    height: 44px;
+    background: #00000000;
+
+    Text {
+        x: 12px;
+        width: parent.width - 12px - 62px;
+        height: parent.height;
+        text: root.title;
+        color: Theme.text;
+        font-size: Theme.font_sm;
+        font-weight: 600;
+        vertical-alignment: center;
+    }
+
+    IosSwitch {
+        x: parent.width - self.width - 12px;
+        y: (parent.height - self.height) / 2;
+        value <=> root.value;
+        reduce_motion: root.reduce_motion;
+    }
+
+    if (root.show_divider) : Rectangle {
+        x: 12px;
+        y: parent.height - 1px;
+        width: parent.width - 12px;
+        height: 1px;
+        background: Theme.border;
+        opacity: 0.85;
+    }
+}
+
 component SettingsNavItem inherits Rectangle {
     in property <string> text: "";
     in property <bool> selected: false;
@@ -195,6 +353,7 @@ export component SettingsApp inherits Rectangle {
 
     // demo state (later wire to Rust)
     in-out property <bool> setting_dark_mode: false;
+    in-out property <bool> setting_reduce_motion: false;
     in-out property <bool> setting_wifi: true;
     in-out property <bool> setting_bluetooth: false;
     in-out property <float> setting_brightness: 60;
@@ -263,7 +422,37 @@ export component SettingsApp inherits Rectangle {
 
             Text { text: "Система"; color: Theme.text; font-size: Theme.font_lg; font-weight: 800; }
 
-            SettingsToggleRow { y: 28px; width: parent.width; label: "Тёмная тема"; value <=> root.setting_dark_mode; reduce_motion: root.reduce_motion; }
+            IosSectionTitle { x: 0px; y: 28px; title: "ОБЩЕЕ"; }
+            general := IosCard {
+                x: 0px;
+                y: 44px;
+                width: parent.width;
+                height: 88px;
+
+                IosSwitchRow { y: 0px; width: parent.width; title: "Тёмная тема"; value <=> root.setting_dark_mode; reduce_motion: root.reduce_motion; show_divider: true; }
+                IosSwitchRow { y: 44px; width: parent.width; title: "Уменьшить анимации"; value <=> root.setting_reduce_motion; reduce_motion: root.reduce_motion; show_divider: false; }
+            }
+
+            IosSectionTitle { x: 0px; y: 144px; title: "ЯЗЫК И РЕГИОН"; }
+            locale := IosCard {
+                x: 0px;
+                y: 160px;
+                width: parent.width;
+                height: 88px;
+
+                IosRowBase { y: 0px; width: parent.width; title: "Язык"; show_value: true; value_text: "Русский"; show_divider: true; }
+                IosRowBase { y: 44px; width: parent.width; title: "Дата и время"; show_value: true; value_text: "Авто"; show_divider: false; }
+            }
+
+            IosSectionTitle { x: 0px; y: 260px; title: "ИНФОРМАЦИЯ"; }
+            about := IosCard {
+                x: 0px;
+                y: 276px;
+                width: parent.width;
+                height: 44px;
+
+                IosRowBase { y: 0px; width: parent.width; title: "О системе"; show_value: false; show_divider: false; }
+            }
         }
 
         // "Экран"
