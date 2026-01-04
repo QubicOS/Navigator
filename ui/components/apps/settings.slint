@@ -146,6 +146,49 @@ component SettingsSliderRow inherits Rectangle {
     }
 }
 
+component SettingsNavScroll inherits Rectangle {
+    in property <bool> reduce_motion: false;
+    in-out property <int> selected_index: 0;
+    // Total number of items; used to compute viewport height.
+    in property <int> item_count: 0;
+
+    property <length> item_h: 36px;
+    property <length> content_h: item_count * item_h;
+
+    background: #00000000;
+    clip: true;
+
+    Flickable {
+        width: parent.width;
+        height: parent.height;
+        interactive: true;
+
+        viewport-height: content_h;
+        viewport-width: parent.width;
+
+        content := Rectangle {
+            width: parent.width;
+            height: content_h;
+            background: #00000000;
+
+            // Items are placed by y = index * item_h.
+            SettingsNavItem { y: 0 * item_h; width: parent.width; text: "Система"; selected: root.selected_index == 0; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 0; } }
+            SettingsNavItem { y: 1 * item_h; width: parent.width; text: "Экран"; selected: root.selected_index == 1; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 1; } }
+            SettingsNavItem { y: 2 * item_h; width: parent.width; text: "Звук"; selected: root.selected_index == 2; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 2; } }
+            SettingsNavItem { y: 3 * item_h; width: parent.width; text: "Сеть"; selected: root.selected_index == 3; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 3; } }
+            SettingsNavItem { y: 4 * item_h; width: parent.width; text: "О системе"; selected: root.selected_index == 4; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 4; } }
+
+            SettingsNavItem { y: 5 * item_h; width: parent.width; text: "Аккаунты"; selected: root.selected_index == 5; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 5; } }
+            SettingsNavItem { y: 6 * item_h; width: parent.width; text: "Приватность"; selected: root.selected_index == 6; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 6; } }
+            SettingsNavItem { y: 7 * item_h; width: parent.width; text: "Уведомления"; selected: root.selected_index == 7; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 7; } }
+            SettingsNavItem { y: 8 * item_h; width: parent.width; text: "Хранилище"; selected: root.selected_index == 8; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 8; } }
+            SettingsNavItem { y: 9 * item_h; width: parent.width; text: "Питание"; selected: root.selected_index == 9; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 9; } }
+            SettingsNavItem { y: 10 * item_h; width: parent.width; text: "Язык"; selected: root.selected_index == 10; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 10; } }
+            SettingsNavItem { y: 11 * item_h; width: parent.width; text: "Дата и время"; selected: root.selected_index == 11; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 11; } }
+        }
+    }
+}
+
 export component SettingsApp inherits Rectangle {
     in property <bool> reduce_motion: false;
     in-out property <int> selected_index: 0;
@@ -193,11 +236,13 @@ export component SettingsApp inherits Rectangle {
             height: parent.height - 40px;
             background: #00000000;
 
-            SettingsNavItem { y: 0px; width: parent.width; text: "Система"; selected: root.selected_index == 0; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 0; } }
-            SettingsNavItem { y: 36px; width: parent.width; text: "Экран"; selected: root.selected_index == 1; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 1; } }
-            SettingsNavItem { y: 72px; width: parent.width; text: "Звук"; selected: root.selected_index == 2; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 2; } }
-            SettingsNavItem { y: 108px; width: parent.width; text: "Сеть"; selected: root.selected_index == 3; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 3; } }
-            SettingsNavItem { y: 144px; width: parent.width; text: "О системе"; selected: root.selected_index == 4; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 4; } }
+            SettingsNavScroll {
+                width: parent.width;
+                height: parent.height;
+                reduce_motion: root.reduce_motion;
+                selected_index <=> root.selected_index;
+                item_count: 12;
+            }
         }
     }
 
@@ -295,6 +340,17 @@ export component SettingsApp inherits Rectangle {
                     font-weight: 600;
                 }
             }
+        }
+
+        // Placeholder pages for additional nav items.
+        if root.selected_index >= 5 : Rectangle {
+            x: Theme.gutter;
+            y: Theme.gutter;
+            width: parent.width - Theme.gutter * 2;
+            height: parent.height - Theme.gutter * 2;
+            background: #00000000;
+
+            Text { text: "Раздел пока не реализован"; color: Theme.text_muted; font-size: Theme.font_md; font-weight: 600; }
         }
     }
 }
