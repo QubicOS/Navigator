@@ -87,6 +87,7 @@ export component AppWindow inherits Window {
             date_text: root.date_text;
             reduce_motion: root.reduce_motion;
             shimmer_phase: root.lock_shimmer_phase;
+            active: root.locked;
             unlock_requested => { root.desktop_page_index = 0; root.locked = false; }
 
             // Transition to desktop.

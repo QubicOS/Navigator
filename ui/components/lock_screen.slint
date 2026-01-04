@@ -6,6 +6,7 @@ export component LockScreen inherits Rectangle {
     in property <string> date_text: "";
     in property <bool> reduce_motion: false;
     in property <int> shimmer_phase: 0;
+    in property <bool> active: true;
     callback unlock_requested();
 
     background: #00000000;
@@ -127,6 +128,7 @@ export component LockScreen inherits Rectangle {
         width: parent.width;
         height: parent.height;
         handle-swipe-up: true;
+        enabled: root.active;
 
         swiped => {
             if ((self.pressed-position.y - self.current-position.y) > 22px) {
