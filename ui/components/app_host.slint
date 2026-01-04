@@ -22,11 +22,18 @@ export component AppHost inherits Rectangle {
         animate opacity { duration: root.reduce_motion ? 0ms : Theme.anim_fast; }
     }
 
+    // Dismiss on pointer-down to avoid immediately closing on the same click
+    // that opened the sheet (the opening click's release can otherwise hit the scrim).
     TouchArea {
         width: parent.width;
         height: parent.height;
         enabled: root.open;
-        clicked => { root.close(); }
+        pointer-event(event) => {
+            if (event.button != PointerEventButton.left) { return; }
+            if (event.kind == PointerEventKind.down) {
+                root.close();
+            }
+        }
     }
 
     panel := Rectangle {
@@ -146,4 +153,3 @@ export component AppHost inherits Rectangle {
         }
     }
 }
-
