@@ -9,16 +9,21 @@ export component AppHost inherits Rectangle {
     background: #00000000;
     visible: open || panel.opacity > 0.0;
 
+    property <bool> dragging: false;
+    property <length> drag_offset: 0px;
+
     function close() {
         root.open = false;
         root.app_id = "";
+        root.dragging = false;
+        root.drag_offset = 0px;
     }
 
-    // No scrim + no outside click-to-close (close only via the X button).
+    // No scrim, but the overlay must still block clicks reaching the desktop.
 
     panel := Rectangle {
         x: 0px;
-        y: root.open ? 0px : parent.height;
+        y: root.open ? (root.dragging ? root.drag_offset : 0px) : parent.height;
         width: parent.width;
         height: parent.height;
         background: Theme.surface_bg;
@@ -28,8 +33,63 @@ export component AppHost inherits Rectangle {
         clip: true;
         opacity: root.open ? 1.0 : 0.0;
 
-        animate y { duration: root.reduce_motion ? 0ms : Theme.anim_med; easing: ease-in-out; }
+        animate y { duration: (root.reduce_motion || root.dragging) ? 0ms : Theme.anim_med; easing: ease-in-out; }
         animate opacity { duration: root.reduce_motion ? 0ms : Theme.anim_med; }
+
+        // Catch-all: consume clicks so they don't go through to Desktop.
+        // Placed first so interactive children drawn later stay clickable.
+        TouchArea {
+            width: parent.width;
+            height: parent.height;
+            enabled: root.open;
+            clicked => {}
+            pointer-event(_) => {}
+        }
+
+        // Handle area (swipe/drag down to close).
+        Rectangle {
+            x: 0px;
+            y: 0px;
+            width: parent.width;
+            height: 14px;
+            background: #00000000;
+
+            Rectangle {
+                x: (parent.width - 44px) / 2;
+                y: 6px;
+                width: 44px;
+                height: 4px;
+                border-radius: 2px;
+                background: Theme.border;
+                opacity: 0.75;
+            }
+        }
+
+        SwipeGestureHandler {
+            x: 0px;
+            y: 0px;
+            width: parent.width;
+            height: 56px;
+            enabled: root.open;
+            handle-swipe-down: true;
+
+            moved => {
+                if (self.swiping) {
+                    root.dragging = true;
+                    root.drag_offset = min(max(self.current-position.y - self.pressed-position.y, 0px), parent.height);
+                }
+            }
+
+            swiped => {
+                root.dragging = false;
+                let delta = self.current-position.y - self.pressed-position.y;
+                if (delta > 60px) {
+                    root.close();
+                } else {
+                    root.drag_offset = 0px;
+                }
+            }
+        }
 
         property <string> title:
             root.app_id == "settings" ? "Настройки"
