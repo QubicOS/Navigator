@@ -75,15 +75,24 @@ component IosRowBase inherits Rectangle {
         }
     }
 
-    Text {
+    title_clip := Rectangle {
         x: root.left_inset;
-        width: parent.width - root.left_inset - 100px;
+        y: 0px;
+        width: parent.width - root.left_inset - (root.show_value ? 110px : root.right_inset);
         height: parent.height;
-        text: root.title;
-        color: Theme.text;
-        font-size: Theme.font_sm;
-        font-weight: 600;
-        vertical-alignment: center;
+        background: #00000000;
+        clip: true;
+
+        Text {
+            width: parent.width;
+            height: parent.height;
+            text: root.title;
+            color: Theme.text;
+            font-size: Theme.font_sm;
+            font-weight: 600;
+            vertical-alignment: center;
+            wrap: no-wrap;
+        }
     }
 
     if (root.show_value) : Text {
@@ -130,15 +139,24 @@ component IosSwitchRow inherits Rectangle {
     height: 44px;
     background: #00000000;
 
-    Text {
+    title_clip := Rectangle {
         x: 12px;
+        y: 0px;
         width: parent.width - 12px - 62px;
         height: parent.height;
-        text: root.title;
-        color: Theme.text;
-        font-size: Theme.font_sm;
-        font-weight: 600;
-        vertical-alignment: center;
+        background: #00000000;
+        clip: true;
+
+        Text {
+            width: parent.width;
+            height: parent.height;
+            text: root.title;
+            color: Theme.text;
+            font-size: Theme.font_sm;
+            font-weight: 600;
+            vertical-alignment: center;
+            wrap: no-wrap;
+        }
     }
 
     IosSwitch {
