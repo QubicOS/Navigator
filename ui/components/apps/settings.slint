@@ -385,6 +385,64 @@ component SettingsNavScroll inherits Rectangle {
     }
 }
 
+component IosChoiceRow inherits Rectangle {
+    in property <string> title: "";
+    in property <bool> selected: false;
+    in property <bool> show_divider: true;
+    in property <bool> reduce_motion: false;
+    callback activated();
+
+    height: 44px;
+    background: #00000000;
+
+    touch := TouchArea {
+        width: parent.width;
+        height: parent.height;
+        clicked => { root.activated(); }
+    }
+
+    Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: #00000008;
+        opacity: touch.pressed ? 1.0 : 0.0;
+        animate opacity { duration: root.reduce_motion ? 0ms : Theme.anim_fast; easing: ease-out; }
+    }
+
+    Text {
+        x: 12px;
+        width: parent.width - 44px;
+        height: parent.height;
+        text: root.title;
+        color: Theme.text;
+        font-size: Theme.font_sm;
+        font-weight: 600;
+        vertical-alignment: center;
+        wrap: no-wrap;
+    }
+
+    if (root.selected) : Text {
+        x: parent.width - 24px;
+        width: 18px;
+        height: parent.height;
+        text: "✓";
+        color: Theme.accent;
+        font-size: 14px;
+        font-weight: 800;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+
+    if (root.show_divider) : Rectangle {
+        x: 12px;
+        y: parent.height - 1px;
+        width: parent.width - 12px;
+        height: 1px;
+        background: Theme.border;
+        opacity: 0.85;
+    }
+}
+
 export component SettingsApp inherits Rectangle {
     in property <bool> reduce_motion: false;
     in-out property <int> selected_index: 0;
@@ -396,6 +454,11 @@ export component SettingsApp inherits Rectangle {
     in-out property <bool> setting_bluetooth: false;
     in-out property <float> setting_brightness: 60;
     in-out property <float> setting_volume: 70;
+    in-out property <string> setting_language: "Русский";
+    in-out property <string> setting_datetime_mode: "Авто";
+
+    // Sub-navigation for "Система" (0 = main).
+    in-out property <int> system_page: 0; // 0 main, 1 language, 2 date/time, 3 about
 
     background: #00000000;
 
@@ -462,7 +525,7 @@ export component SettingsApp inherits Rectangle {
             detail_content := Rectangle {
                 width: parent.width;
                 height:
-                    root.selected_index == 0 ? 312px
+                    root.selected_index == 0 ? (root.system_page == 0 ? 320px : 240px)
                   : root.selected_index == 1 ? 170px
                   : root.selected_index == 2 ? 170px
                   : root.selected_index == 3 ? 190px
@@ -471,7 +534,7 @@ export component SettingsApp inherits Rectangle {
                 background: #00000000;
 
                 // "Система" (start at top, no extra heading; AppHost already has a header).
-                if root.selected_index == 0 : Rectangle {
+                if root.selected_index == 0 && root.system_page == 0 : Rectangle {
                     x: Theme.gutter;
                     y: 8px;
                     width: parent.width - Theme.gutter * 2;
@@ -496,8 +559,8 @@ export component SettingsApp inherits Rectangle {
                         width: parent.width;
                         height: 96px;
 
-                        IosRowBase { y: 0px; width: parent.width; title: "Язык"; show_value: true; value_text: "Русский"; show_divider: true; activated => {}; }
-                        IosRowBase { y: 44px; width: parent.width; title: "Дата и время"; multiline: true; show_value: true; value_text: "Авто"; show_divider: false; activated => {}; }
+                        IosRowBase { y: 0px; width: parent.width; title: "Язык"; show_value: true; value_text: root.setting_language; show_divider: true; activated => { root.system_page = 1; } }
+                        IosRowBase { y: 44px; width: parent.width; title: "Дата и время"; multiline: true; show_value: true; value_text: root.setting_datetime_mode; show_divider: false; activated => { root.system_page = 2; } }
                     }
 
                     IosSectionTitle { x: 0px; y: 244px; title: "ИНФОРМАЦИЯ"; }
@@ -507,7 +570,69 @@ export component SettingsApp inherits Rectangle {
                         width: parent.width;
                         height: 44px;
 
-                        IosRowBase { y: 0px; width: parent.width; title: "О системе"; show_value: false; show_divider: false; activated => {}; }
+                        IosRowBase { y: 0px; width: parent.width; title: "О системе"; show_value: false; show_divider: false; activated => { root.system_page = 3; } }
+                    }
+                }
+
+                // System subpages.
+                if root.selected_index == 0 && root.system_page == 1 : Rectangle {
+                    x: Theme.gutter;
+                    y: 8px;
+                    width: parent.width - Theme.gutter * 2;
+                    height: parent.height;
+                    background: #00000000;
+
+                    IosRowBase { y: 0px; width: parent.width; title: "‹ Назад"; show_chevron: false; show_divider: false; activated => { root.system_page = 0; } }
+                    IosSectionTitle { x: 0px; y: 40px; title: "ЯЗЫК"; }
+                    IosCard {
+                        x: 0px;
+                        y: 54px;
+                        width: parent.width;
+                        height: 88px;
+
+                        IosChoiceRow { y: 0px; width: parent.width; title: "Русский"; selected: root.setting_language == "Русский"; reduce_motion: root.reduce_motion; show_divider: true; activated => { root.setting_language = "Русский"; } }
+                        IosChoiceRow { y: 44px; width: parent.width; title: "English"; selected: root.setting_language == "English"; reduce_motion: root.reduce_motion; show_divider: false; activated => { root.setting_language = "English"; } }
+                    }
+                }
+
+                if root.selected_index == 0 && root.system_page == 2 : Rectangle {
+                    x: Theme.gutter;
+                    y: 8px;
+                    width: parent.width - Theme.gutter * 2;
+                    height: parent.height;
+                    background: #00000000;
+
+                    IosRowBase { y: 0px; width: parent.width; title: "‹ Назад"; show_chevron: false; show_divider: false; activated => { root.system_page = 0; } }
+                    IosSectionTitle { x: 0px; y: 40px; title: "ДАТА И ВРЕМЯ"; }
+                    IosCard {
+                        x: 0px;
+                        y: 54px;
+                        width: parent.width;
+                        height: 88px;
+
+                        IosChoiceRow { y: 0px; width: parent.width; title: "Авто"; selected: root.setting_datetime_mode == "Авто"; reduce_motion: root.reduce_motion; show_divider: true; activated => { root.setting_datetime_mode = "Авто"; } }
+                        IosChoiceRow { y: 44px; width: parent.width; title: "Вручную"; selected: root.setting_datetime_mode == "Вручную"; reduce_motion: root.reduce_motion; show_divider: false; activated => { root.setting_datetime_mode = "Вручную"; } }
+                    }
+                }
+
+                if root.selected_index == 0 && root.system_page == 3 : Rectangle {
+                    x: Theme.gutter;
+                    y: 8px;
+                    width: parent.width - Theme.gutter * 2;
+                    height: parent.height;
+                    background: #00000000;
+
+                    IosRowBase { y: 0px; width: parent.width; title: "‹ Назад"; show_chevron: false; show_divider: false; activated => { root.system_page = 0; } }
+                    IosSectionTitle { x: 0px; y: 40px; title: "О СИСТЕМЕ"; }
+
+                    IosCard {
+                        x: 0px;
+                        y: 54px;
+                        width: parent.width;
+                        height: 88px;
+
+                        IosRowBase { y: 0px; width: parent.width; title: "BlackBerry UI Demo"; show_chevron: false; show_value: false; show_divider: true; activated => {}; }
+                        IosRowBase { y: 44px; width: parent.width; title: "Версия"; show_chevron: false; show_value: true; value_text: "v0.1"; show_divider: false; activated => {}; }
                     }
                 }
 
