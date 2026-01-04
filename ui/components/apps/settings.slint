@@ -802,7 +802,7 @@ export component SettingsApp inherits Rectangle {
             width: parent.width;
             height: parent.height;
             enabled: root.about_open;
-            clicked => {}
+            clicked => { root.about_open = false; }
             pointer-event(_) => {}
         }
 
@@ -829,6 +829,21 @@ export component SettingsApp inherits Rectangle {
                 border-radius: 2px;
                 background: Theme.border;
                 opacity: 0.75;
+            }
+
+            // Dismiss by swiping down on the header area.
+            SwipeGestureHandler {
+                x: 0px;
+                y: 0px;
+                width: parent.width;
+                height: about_sheet.header_h;
+                enabled: root.about_open;
+                handle-swipe-down: true;
+
+                swiped => {
+                    let delta = self.current-position.y - self.pressed-position.y;
+                    if (delta > 30px) { root.about_open = false; }
+                }
             }
 
             Text {
