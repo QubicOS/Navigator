@@ -487,6 +487,10 @@ component IosPrimaryButton inherits Rectangle {
 
 export component SettingsApp inherits Rectangle {
     in property <bool> reduce_motion: false;
+    in property <string> app_version: "";
+    in property <string> runtime_os: "";
+    in property <string> runtime_arch: "";
+    in property <string> runtime_platform: "";
     in-out property <int> selected_index: 0;
 
     // demo state (later wire to Rust)
@@ -503,6 +507,7 @@ export component SettingsApp inherits Rectangle {
     in-out property <bool> selector_open: false;
     in-out property <SelectionKind> selector_kind: SelectionKind.None;
     in-out property <int> selector_pending_index: 0;
+    in-out property <bool> about_open: false;
 
     background: #00000000;
 
@@ -636,7 +641,7 @@ export component SettingsApp inherits Rectangle {
                         width: parent.width;
                         height: 44px;
 
-                        IosRowBase { y: 0px; width: parent.width; title: "О системе"; show_value: false; show_divider: false; activated => { } }
+                        IosRowBase { y: 0px; width: parent.width; title: "О системе"; show_value: false; show_divider: false; activated => { root.about_open = true; } }
                     }
                 }
 
@@ -772,6 +777,156 @@ export component SettingsApp inherits Rectangle {
                 text: "Применить";
                 reduce_motion: root.reduce_motion;
                 clicked => { root.apply_selector(); }
+            }
+        }
+    }
+
+    // About sheet (T-Deck profile + runtime info).
+    about_overlay := Rectangle {
+        x: 0px;
+        y: 0px;
+        width: parent.width;
+        height: parent.height;
+        background: #00000000;
+        visible: root.about_open;
+
+        Rectangle {
+            width: parent.width;
+            height: parent.height;
+            background: Theme.scrim;
+            opacity: root.about_open ? 1.0 : 0.0;
+            animate opacity { duration: root.reduce_motion ? 0ms : Theme.anim_fast; }
+        }
+
+        TouchArea {
+            width: parent.width;
+            height: parent.height;
+            enabled: root.about_open;
+            clicked => {}
+            pointer-event(_) => {}
+        }
+
+        about_sheet := Rectangle {
+            property <length> header_h: 44px;
+            property <length> footer_h: 0px;
+            x: 0px;
+            width: parent.width;
+            height: 260px;
+            y: root.about_open ? parent.height - self.height : parent.height;
+            background: Theme.surface_bg;
+            border-width: 1px;
+            border-color: Theme.border;
+            border-radius: Theme.radius_lg;
+            clip: true;
+
+            animate y { duration: root.reduce_motion ? 0ms : Theme.anim_med; easing: ease-in-out; }
+
+            Rectangle {
+                x: (parent.width - 44px) / 2;
+                y: 8px;
+                width: 44px;
+                height: 4px;
+                border-radius: 2px;
+                background: Theme.border;
+                opacity: 0.75;
+            }
+
+            Text {
+                x: Theme.gutter;
+                y: 18px;
+                text: "О системе";
+                color: Theme.text;
+                font-size: Theme.font_md;
+                font-weight: 800;
+            }
+
+            Rectangle {
+                x: parent.width - Theme.gutter - 64px;
+                y: 12px;
+                width: 64px;
+                height: 28px;
+                background: #00000000;
+
+                Text {
+                    width: parent.width;
+                    height: parent.height;
+                    text: "Готово";
+                    color: Theme.accent;
+                    font-size: Theme.font_sm;
+                    font-weight: 800;
+                    horizontal-alignment: right;
+                    vertical-alignment: center;
+                }
+
+                TouchArea {
+                    width: parent.width;
+                    height: parent.height;
+                    clicked => { root.about_open = false; }
+                }
+            }
+
+            Rectangle {
+                x: 0px;
+                y: about_sheet.header_h;
+                width: parent.width;
+                height: 1px;
+                background: Theme.border;
+            }
+
+            content_scroll := Flickable {
+                x: 0px;
+                y: about_sheet.header_h + 1px;
+                width: parent.width;
+                height: parent.height - about_sheet.header_h - 1px;
+                interactive: true;
+                viewport-width: parent.width;
+                viewport-height: about_content.height;
+
+                about_content := Rectangle {
+                    width: parent.width;
+                    height: 460px;
+                    background: #00000000;
+
+                    property <length> x_inset: Theme.gutter;
+                    property <length> w_inset: parent.width - Theme.gutter * 2;
+
+                    IosSectionTitle { x: x_inset; y: 10px; title: "ПРОФИЛЬ"; }
+                    IosCard {
+                        x: x_inset;
+                        y: 24px;
+                        width: w_inset;
+                        height: 132px;
+
+                        IosRowBase { y: 0px; width: parent.width; title: "Устройство"; show_chevron: false; show_value: true; value_text: "T‑Deck"; show_divider: true; reduce_motion: root.reduce_motion; activated => {}; }
+                        IosRowBase { y: 44px; width: parent.width; title: "Форм‑фактор"; multiline: true; show_chevron: false; show_value: true; value_text: "портативный, клавиатура"; show_divider: true; reduce_motion: root.reduce_motion; activated => {}; }
+                        IosRowBase { y: 88px; width: parent.width; title: "Цель UI"; show_chevron: false; show_value: true; value_text: "320×240"; show_divider: false; reduce_motion: root.reduce_motion; activated => {}; }
+                    }
+
+                    IosSectionTitle { x: x_inset; y: 170px; title: "АППАРАТНО (ОБЩЕЕ)"; }
+                    IosCard {
+                        x: x_inset;
+                        y: 184px;
+                        width: w_inset;
+                        height: 176px;
+
+                        IosRowBase { y: 0px; width: parent.width; title: "Платформа"; show_chevron: false; show_value: true; value_text: "ESP32‑S3 class"; show_divider: true; reduce_motion: root.reduce_motion; activated => {}; }
+                        IosRowBase { y: 44px; width: parent.width; title: "Связь"; show_chevron: false; show_value: true; value_text: "Wi‑Fi / BLE"; show_divider: true; reduce_motion: root.reduce_motion; activated => {}; }
+                        IosRowBase { y: 88px; width: parent.width; title: "Экран"; show_chevron: false; show_value: true; value_text: "TFT, 320×240"; show_divider: true; reduce_motion: root.reduce_motion; activated => {}; }
+                        IosRowBase { y: 132px; width: parent.width; title: "Питание"; show_chevron: false; show_value: true; value_text: "LiPo"; show_divider: false; reduce_motion: root.reduce_motion; activated => {}; }
+                    }
+
+                    IosSectionTitle { x: x_inset; y: 374px; title: "СБОРКА"; }
+                    IosCard {
+                        x: x_inset;
+                        y: 388px;
+                        width: w_inset;
+                        height: 132px;
+
+                        IosRowBase { y: 0px; width: parent.width; title: "Версия"; show_chevron: false; show_value: true; value_text: root.app_version; show_divider: true; reduce_motion: root.reduce_motion; activated => {}; }
+                        IosRowBase { y: 44px; width: parent.width; title: "Среда"; show_chevron: false; show_value: true; value_text: root.runtime_platform; show_divider: true; reduce_motion: root.reduce_motion; activated => {}; }
+                        IosRowBase { y: 88px; width: parent.width; title: "UI"; show_chevron: false; show_value: true; value_text: "Slint 1.14"; show_divider: false; reduce_motion: root.reduce_motion; activated => {}; }
+                    }
+                }
             }
         }
     }

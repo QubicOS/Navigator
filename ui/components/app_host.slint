@@ -5,6 +5,10 @@ export component AppHost inherits Rectangle {
     in-out property <bool> open: false;
     in-out property <string> app_id: "";
     in property <bool> reduce_motion: false;
+    in property <string> app_version: "";
+    in property <string> runtime_os: "";
+    in property <string> runtime_arch: "";
+    in property <string> runtime_platform: "";
 
     background: #00000000;
     visible: open || panel.opacity > 0.0;
@@ -153,6 +157,10 @@ export component AppHost inherits Rectangle {
                 height: parent.height;
                 visible: root.app_id == "settings";
                 reduce_motion: root.reduce_motion;
+                app_version: root.app_version;
+                runtime_os: root.runtime_os;
+                runtime_arch: root.runtime_arch;
+                runtime_platform: root.runtime_platform;
             }
 
             Text {

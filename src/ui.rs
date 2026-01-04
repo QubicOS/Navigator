@@ -31,6 +31,10 @@ pub fn run_app() -> Result<(), slint::PlatformError> {
 
     let reduce_motion = reduce_motion_requested();
     app.set_reduce_motion(reduce_motion);
+    app.set_app_version(env!("CARGO_PKG_VERSION").into());
+    app.set_runtime_os(std::env::consts::OS.into());
+    app.set_runtime_arch(std::env::consts::ARCH.into());
+    app.set_runtime_platform(format!("{}/{}", std::env::consts::OS, std::env::consts::ARCH).into());
 
     // Keep the clock text in sync with system time.
     let update_time = move || {

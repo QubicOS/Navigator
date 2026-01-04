@@ -25,6 +25,10 @@ export component AppWindow inherits Window {
     in-out property <int> desktop_page_index: 0;
     in-out property <bool> app_open: false;
     in-out property <string> current_app_id: "";
+    in property <string> app_version: "0.1.0";
+    in property <string> runtime_os: "";
+    in property <string> runtime_arch: "";
+    in property <string> runtime_platform: "";
 
     background: Theme.window_bg;
 
@@ -78,6 +82,10 @@ export component AppWindow inherits Window {
             open <=> root.app_open;
             app_id <=> root.current_app_id;
             reduce_motion: root.reduce_motion;
+            app_version: root.app_version;
+            runtime_os: root.runtime_os;
+            runtime_arch: root.runtime_arch;
+            runtime_platform: root.runtime_platform;
         }
 
         lock := LockScreen {
