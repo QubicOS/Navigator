@@ -435,7 +435,7 @@ export component SettingsApp inherits Rectangle {
                 // "Система" (start at top, no extra heading; AppHost already has a header).
                 if root.selected_index == 0 : Rectangle {
                     x: Theme.gutter;
-                    y: 0px;
+                    y: 8px;
                     width: parent.width - Theme.gutter * 2;
                     height: parent.height;
                     background: #00000000;
@@ -451,10 +451,10 @@ export component SettingsApp inherits Rectangle {
                         IosSwitchRow { y: 44px; width: parent.width; title: "Уменьшить анимации"; value <=> root.setting_reduce_motion; reduce_motion: root.reduce_motion; show_divider: false; }
                     }
 
-                    IosSectionTitle { x: 0px; y: 114px; title: "ЯЗЫК И РЕГИОН"; }
+                    IosSectionTitle { x: 0px; y: 122px; title: "ЯЗЫК И РЕГИОН"; }
                     IosCard {
                         x: 0px;
-                        y: 128px;
+                        y: 136px;
                         width: parent.width;
                         height: 88px;
 
@@ -462,10 +462,10 @@ export component SettingsApp inherits Rectangle {
                         IosRowBase { y: 44px; width: parent.width; title: "Дата и время"; show_value: true; value_text: "Авто"; show_divider: false; }
                     }
 
-                    IosSectionTitle { x: 0px; y: 228px; title: "ИНФОРМАЦИЯ"; }
+                    IosSectionTitle { x: 0px; y: 236px; title: "ИНФОРМАЦИЯ"; }
                     IosCard {
                         x: 0px;
-                        y: 242px;
+                        y: 250px;
                         width: parent.width;
                         height: 44px;
 
