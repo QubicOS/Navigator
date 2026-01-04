@@ -136,8 +136,9 @@ component IosSwitchRow inherits Rectangle {
     in-out property <bool> value: false;
     in property <bool> show_divider: true;
     in property <bool> reduce_motion: false;
+    in property <bool> multiline: false;
 
-    height: 44px;
+    height: root.multiline ? 52px : 44px;
     background: #00000000;
 
     title_clip := Rectangle {
@@ -156,7 +157,7 @@ component IosSwitchRow inherits Rectangle {
             font-size: Theme.font_sm;
             font-weight: 600;
             vertical-alignment: center;
-            wrap: no-wrap;
+            wrap: root.multiline ? word-wrap : no-wrap;
         }
     }
 
@@ -443,7 +444,7 @@ export component SettingsApp inherits Rectangle {
             detail_content := Rectangle {
                 width: parent.width;
                 height:
-                    root.selected_index == 0 ? 304px
+                    root.selected_index == 0 ? 312px
                   : root.selected_index == 1 ? 170px
                   : root.selected_index == 2 ? 170px
                   : root.selected_index == 3 ? 190px
@@ -460,15 +461,15 @@ export component SettingsApp inherits Rectangle {
                     background: #00000000;
 
                     IosSectionTitle { x: 0px; y: 0px; title: "ОБЩЕЕ"; }
-                    IosCard {
-                        x: 0px;
-                        y: 14px;
-                        width: parent.width;
-                        height: 88px;
+                IosCard {
+                    x: 0px;
+                    y: 14px;
+                    width: parent.width;
+                    height: 96px;
 
-                        IosSwitchRow { y: 0px; width: parent.width; title: "Тёмная тема"; value <=> root.setting_dark_mode; reduce_motion: root.reduce_motion; show_divider: true; }
-                        IosSwitchRow { y: 44px; width: parent.width; title: "Уменьшить анимации"; value <=> root.setting_reduce_motion; reduce_motion: root.reduce_motion; show_divider: false; }
-                    }
+                    IosSwitchRow { y: 0px; width: parent.width; title: "Тёмная тема"; value <=> root.setting_dark_mode; reduce_motion: root.reduce_motion; show_divider: true; }
+                    IosSwitchRow { y: 44px; width: parent.width; title: "Уменьшить анимации"; value <=> root.setting_reduce_motion; reduce_motion: root.reduce_motion; show_divider: false; multiline: true; }
+                }
 
                     IosSectionTitle { x: 0px; y: 122px; title: "ЯЗЫК И РЕГИОН"; }
                     IosCard {
