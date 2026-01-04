@@ -412,134 +412,83 @@ export component SettingsApp inherits Rectangle {
         height: parent.height;
         background: #00000000;
 
-        // "Система"
-        if root.selected_index == 0 : Rectangle {
-            x: Theme.gutter;
-            y: Theme.gutter;
-            width: parent.width - Theme.gutter * 2;
-            height: parent.height - Theme.gutter * 2;
-            background: #00000000;
+        // Right pane is scrollable (iOS-like long lists).
+        detail_scroll := Flickable {
+            width: parent.width;
+            height: parent.height;
+            interactive: true;
 
-            Text { text: "Система"; color: Theme.text; font-size: Theme.font_lg; font-weight: 800; }
+            viewport-width: parent.width;
+            viewport-height: detail_content.height;
 
-            IosSectionTitle { x: 0px; y: 28px; title: "ОБЩЕЕ"; }
-            general := IosCard {
-                x: 0px;
-                y: 44px;
+            detail_content := Rectangle {
                 width: parent.width;
-                height: 88px;
+                height:
+                    root.selected_index == 0 ? 304px
+                  : root.selected_index == 1 ? 170px
+                  : root.selected_index == 2 ? 170px
+                  : root.selected_index == 3 ? 190px
+                  : root.selected_index == 4 ? 120px
+                  : 120px;
+                background: #00000000;
 
-                IosSwitchRow { y: 0px; width: parent.width; title: "Тёмная тема"; value <=> root.setting_dark_mode; reduce_motion: root.reduce_motion; show_divider: true; }
-                IosSwitchRow { y: 44px; width: parent.width; title: "Уменьшить анимации"; value <=> root.setting_reduce_motion; reduce_motion: root.reduce_motion; show_divider: false; }
-            }
+                // "Система" (start at top, no extra heading; AppHost already has a header).
+                if root.selected_index == 0 : Rectangle {
+                    x: Theme.gutter;
+                    y: 0px;
+                    width: parent.width - Theme.gutter * 2;
+                    height: parent.height;
+                    background: #00000000;
 
-            IosSectionTitle { x: 0px; y: 144px; title: "ЯЗЫК И РЕГИОН"; }
-            locale := IosCard {
-                x: 0px;
-                y: 160px;
-                width: parent.width;
-                height: 88px;
+                    IosSectionTitle { x: 0px; y: 0px; title: "ОБЩЕЕ"; }
+                    IosCard {
+                        x: 0px;
+                        y: 14px;
+                        width: parent.width;
+                        height: 88px;
 
-                IosRowBase { y: 0px; width: parent.width; title: "Язык"; show_value: true; value_text: "Русский"; show_divider: true; }
-                IosRowBase { y: 44px; width: parent.width; title: "Дата и время"; show_value: true; value_text: "Авто"; show_divider: false; }
-            }
+                        IosSwitchRow { y: 0px; width: parent.width; title: "Тёмная тема"; value <=> root.setting_dark_mode; reduce_motion: root.reduce_motion; show_divider: true; }
+                        IosSwitchRow { y: 44px; width: parent.width; title: "Уменьшить анимации"; value <=> root.setting_reduce_motion; reduce_motion: root.reduce_motion; show_divider: false; }
+                    }
 
-            IosSectionTitle { x: 0px; y: 260px; title: "ИНФОРМАЦИЯ"; }
-            about := IosCard {
-                x: 0px;
-                y: 276px;
-                width: parent.width;
-                height: 44px;
+                    IosSectionTitle { x: 0px; y: 114px; title: "ЯЗЫК И РЕГИОН"; }
+                    IosCard {
+                        x: 0px;
+                        y: 128px;
+                        width: parent.width;
+                        height: 88px;
 
-                IosRowBase { y: 0px; width: parent.width; title: "О системе"; show_value: false; show_divider: false; }
-            }
-        }
+                        IosRowBase { y: 0px; width: parent.width; title: "Язык"; show_value: true; value_text: "Русский"; show_divider: true; }
+                        IosRowBase { y: 44px; width: parent.width; title: "Дата и время"; show_value: true; value_text: "Авто"; show_divider: false; }
+                    }
 
-        // "Экран"
-        if root.selected_index == 1 : Rectangle {
-            x: Theme.gutter;
-            y: Theme.gutter;
-            width: parent.width - Theme.gutter * 2;
-            height: parent.height - Theme.gutter * 2;
-            background: #00000000;
+                    IosSectionTitle { x: 0px; y: 228px; title: "ИНФОРМАЦИЯ"; }
+                    IosCard {
+                        x: 0px;
+                        y: 242px;
+                        width: parent.width;
+                        height: 44px;
 
-            Text { text: "Экран"; color: Theme.text; font-size: Theme.font_lg; font-weight: 800; }
-            SettingsSliderRow { y: 30px; width: parent.width; label: "Яркость"; value <=> root.setting_brightness; reduce_motion: root.reduce_motion; }
-        }
-
-        // "Звук"
-        if root.selected_index == 2 : Rectangle {
-            x: Theme.gutter;
-            y: Theme.gutter;
-            width: parent.width - Theme.gutter * 2;
-            height: parent.height - Theme.gutter * 2;
-            background: #00000000;
-
-            Text { text: "Звук"; color: Theme.text; font-size: Theme.font_lg; font-weight: 800; }
-            SettingsSliderRow { y: 30px; width: parent.width; label: "Громкость"; value <=> root.setting_volume; reduce_motion: root.reduce_motion; }
-        }
-
-        // "Сеть"
-        if root.selected_index == 3 : Rectangle {
-            x: Theme.gutter;
-            y: Theme.gutter;
-            width: parent.width - Theme.gutter * 2;
-            height: parent.height - Theme.gutter * 2;
-            background: #00000000;
-
-            Text { text: "Сеть"; color: Theme.text; font-size: Theme.font_lg; font-weight: 800; }
-            SettingsToggleRow { y: 28px; width: parent.width; label: "Wi‑Fi"; value <=> root.setting_wifi; reduce_motion: root.reduce_motion; }
-            SettingsToggleRow { y: 66px; width: parent.width; label: "Bluetooth"; value <=> root.setting_bluetooth; reduce_motion: root.reduce_motion; }
-        }
-
-        // "О системе"
-        if root.selected_index == 4 : Rectangle {
-            x: Theme.gutter;
-            y: Theme.gutter;
-            width: parent.width - Theme.gutter * 2;
-            height: parent.height - Theme.gutter * 2;
-            background: #00000000;
-
-            Text { text: "О системе"; color: Theme.text; font-size: Theme.font_lg; font-weight: 800; }
-
-            Rectangle {
-                y: 30px;
-                width: parent.width;
-                height: 54px;
-                border-width: 1px;
-                border-color: Theme.border;
-                border-radius: Theme.radius_md;
-                background: Theme.surface_bg;
-
-                Text {
-                    x: 10px;
-                    y: 10px;
-                    text: "BlackBerry UI Demo";
-                    color: Theme.text;
-                    font-size: Theme.font_md;
-                    font-weight: 700;
+                        IosRowBase { y: 0px; width: parent.width; title: "О системе"; show_value: false; show_divider: false; }
+                    }
                 }
 
-                Text {
-                    x: 10px;
-                    y: 28px;
-                    text: "v0.1";
-                    color: Theme.text_dim;
-                    font-size: Theme.font_sm;
-                    font-weight: 600;
+                // Other sections: placeholders (for now).
+                if root.selected_index != 0 : Rectangle {
+                    x: Theme.gutter;
+                    y: 0px;
+                    width: parent.width - Theme.gutter * 2;
+                    height: parent.height;
+                    background: #00000000;
+
+                    Text {
+                        text: "Раздел пока не реализован";
+                        color: Theme.text_muted;
+                        font-size: Theme.font_md;
+                        font-weight: 600;
+                    }
                 }
             }
-        }
-
-        // Placeholder pages for additional nav items.
-        if root.selected_index >= 5 : Rectangle {
-            x: Theme.gutter;
-            y: Theme.gutter;
-            width: parent.width - Theme.gutter * 2;
-            height: parent.height - Theme.gutter * 2;
-            background: #00000000;
-
-            Text { text: "Раздел пока не реализован"; color: Theme.text_muted; font-size: Theme.font_md; font-weight: 600; }
         }
     }
 }
