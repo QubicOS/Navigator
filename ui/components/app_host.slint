@@ -14,27 +14,7 @@ export component AppHost inherits Rectangle {
         root.app_id = "";
     }
 
-    Rectangle {
-        width: parent.width;
-        height: parent.height;
-        background: Theme.scrim;
-        opacity: root.open ? 1.0 : 0.0;
-        animate opacity { duration: root.reduce_motion ? 0ms : Theme.anim_fast; }
-    }
-
-    // Dismiss on pointer-down to avoid immediately closing on the same click
-    // that opened the sheet (the opening click's release can otherwise hit the scrim).
-    TouchArea {
-        width: parent.width;
-        height: parent.height;
-        enabled: root.open;
-        pointer-event(event) => {
-            if (event.button != PointerEventButton.left) { return; }
-            if (event.kind == PointerEventKind.down) {
-                root.close();
-            }
-        }
-    }
+    // No scrim + no outside click-to-close (close only via the X button).
 
     panel := Rectangle {
         x: 0px;
@@ -42,24 +22,14 @@ export component AppHost inherits Rectangle {
         width: parent.width;
         height: parent.height;
         background: Theme.surface_bg;
-        border-width: 1px;
+        border-width: 0px;
         border-color: Theme.border;
-        border-radius: Theme.radius_lg;
+        border-radius: 0px;
         clip: true;
         opacity: root.open ? 1.0 : 0.0;
 
         animate y { duration: root.reduce_motion ? 0ms : Theme.anim_med; easing: ease-in-out; }
         animate opacity { duration: root.reduce_motion ? 0ms : Theme.anim_med; }
-
-        Rectangle {
-            x: (parent.width - 44px) / 2;
-            y: 8px;
-            width: 44px;
-            height: 4px;
-            border-radius: 2px;
-            background: Theme.border;
-            opacity: 0.75;
-        }
 
         property <string> title:
             root.app_id == "settings" ? "Настройки"
@@ -138,18 +108,4 @@ export component AppHost inherits Rectangle {
         }
     }
 
-    SwipeGestureHandler {
-        x: 0px;
-        y: panel.y;
-        width: parent.width;
-        height: root.open ? 56px : 0px;
-        enabled: root.open;
-        handle-swipe-down: true;
-
-        swiped => {
-            if ((self.current-position.y - self.pressed-position.y) > 22px) {
-                root.close();
-            }
-        }
-    }
 }
