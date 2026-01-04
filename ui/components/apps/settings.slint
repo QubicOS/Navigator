@@ -1,5 +1,11 @@
 import { Theme } from "../theme.slint";
 
+enum SelectionKind {
+    None,
+    Language,
+    DateTime,
+}
+
 component IosSectionTitle inherits Text {
     in property <string> title: "";
     text: root.title;
@@ -443,6 +449,42 @@ component IosChoiceRow inherits Rectangle {
     }
 }
 
+component IosPrimaryButton inherits Rectangle {
+    in property <string> text: "";
+    in property <bool> reduce_motion: false;
+    callback clicked();
+
+    height: 38px;
+    border-radius: 10px;
+    background: @linear-gradient(180deg, Theme.accent 0%, Theme.accent_2 100%);
+
+    Text {
+        width: parent.width;
+        height: parent.height;
+        text: root.text;
+        color: Theme.on_accent;
+        font-size: Theme.font_md;
+        font-weight: 800;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+
+    pressed_layer := Rectangle {
+        width: parent.width;
+        height: parent.height;
+        border-radius: parent.border-radius;
+        background: #00000018;
+        opacity: touch.pressed ? 1.0 : 0.0;
+        animate opacity { duration: root.reduce_motion ? 0ms : Theme.anim_fast; }
+    }
+
+    touch := TouchArea {
+        width: parent.width;
+        height: parent.height;
+        clicked => { root.clicked(); }
+    }
+}
+
 export component SettingsApp inherits Rectangle {
     in property <bool> reduce_motion: false;
     in-out property <int> selected_index: 0;
@@ -456,11 +498,35 @@ export component SettingsApp inherits Rectangle {
     in-out property <float> setting_volume: 70;
     in-out property <string> setting_language: "Русский";
     in-out property <string> setting_datetime_mode: "Авто";
-
-    // Sub-navigation for "Система" (0 = main).
-    in-out property <int> system_page: 0; // 0 main, 1 language, 2 date/time, 3 about
+    
+    // Modal selector (dims whole screen + bottom sheet).
+    in-out property <bool> selector_open: false;
+    in-out property <SelectionKind> selector_kind: SelectionKind.None;
+    in-out property <int> selector_pending_index: 0;
 
     background: #00000000;
+
+    function open_language_selector() {
+        root.selector_kind = SelectionKind.Language;
+        root.selector_pending_index = root.setting_language == "Русский" ? 0 : 1;
+        root.selector_open = true;
+    }
+
+    function open_datetime_selector() {
+        root.selector_kind = SelectionKind.DateTime;
+        root.selector_pending_index = root.setting_datetime_mode == "Авто" ? 0 : 1;
+        root.selector_open = true;
+    }
+
+    function apply_selector() {
+        if (root.selector_kind == SelectionKind.Language) {
+            root.setting_language = root.selector_pending_index == 0 ? "Русский" : "English";
+        } else if (root.selector_kind == SelectionKind.DateTime) {
+            root.setting_datetime_mode = root.selector_pending_index == 0 ? "Авто" : "Вручную";
+        }
+        root.selector_open = false;
+        root.selector_kind = SelectionKind.None;
+    }
 
     // Left navigation + right content.
     nav := Rectangle {
@@ -525,7 +591,7 @@ export component SettingsApp inherits Rectangle {
             detail_content := Rectangle {
                 width: parent.width;
                 height:
-                    root.selected_index == 0 ? (root.system_page == 0 ? 320px : 240px)
+                    root.selected_index == 0 ? 328px
                   : root.selected_index == 1 ? 170px
                   : root.selected_index == 2 ? 170px
                   : root.selected_index == 3 ? 190px
@@ -534,7 +600,7 @@ export component SettingsApp inherits Rectangle {
                 background: #00000000;
 
                 // "Система" (start at top, no extra heading; AppHost already has a header).
-                if root.selected_index == 0 && root.system_page == 0 : Rectangle {
+                if root.selected_index == 0 : Rectangle {
                     x: Theme.gutter;
                     y: 8px;
                     width: parent.width - Theme.gutter * 2;
@@ -559,8 +625,8 @@ export component SettingsApp inherits Rectangle {
                         width: parent.width;
                         height: 96px;
 
-                        IosRowBase { y: 0px; width: parent.width; title: "Язык"; show_value: true; value_text: root.setting_language; show_divider: true; activated => { root.system_page = 1; } }
-                        IosRowBase { y: 44px; width: parent.width; title: "Дата и время"; multiline: true; show_value: true; value_text: root.setting_datetime_mode; show_divider: false; activated => { root.system_page = 2; } }
+                        IosRowBase { y: 0px; width: parent.width; title: "Язык"; show_value: true; value_text: root.setting_language; show_divider: true; activated => { root.open_language_selector(); } }
+                        IosRowBase { y: 44px; width: parent.width; title: "Дата и время"; multiline: true; show_value: true; value_text: root.setting_datetime_mode; show_divider: false; activated => { root.open_datetime_selector(); } }
                     }
 
                     IosSectionTitle { x: 0px; y: 244px; title: "ИНФОРМАЦИЯ"; }
@@ -570,69 +636,7 @@ export component SettingsApp inherits Rectangle {
                         width: parent.width;
                         height: 44px;
 
-                        IosRowBase { y: 0px; width: parent.width; title: "О системе"; show_value: false; show_divider: false; activated => { root.system_page = 3; } }
-                    }
-                }
-
-                // System subpages.
-                if root.selected_index == 0 && root.system_page == 1 : Rectangle {
-                    x: Theme.gutter;
-                    y: 8px;
-                    width: parent.width - Theme.gutter * 2;
-                    height: parent.height;
-                    background: #00000000;
-
-                    IosRowBase { y: 0px; width: parent.width; title: "‹ Назад"; show_chevron: false; show_divider: false; activated => { root.system_page = 0; } }
-                    IosSectionTitle { x: 0px; y: 40px; title: "ЯЗЫК"; }
-                    IosCard {
-                        x: 0px;
-                        y: 54px;
-                        width: parent.width;
-                        height: 88px;
-
-                        IosChoiceRow { y: 0px; width: parent.width; title: "Русский"; selected: root.setting_language == "Русский"; reduce_motion: root.reduce_motion; show_divider: true; activated => { root.setting_language = "Русский"; } }
-                        IosChoiceRow { y: 44px; width: parent.width; title: "English"; selected: root.setting_language == "English"; reduce_motion: root.reduce_motion; show_divider: false; activated => { root.setting_language = "English"; } }
-                    }
-                }
-
-                if root.selected_index == 0 && root.system_page == 2 : Rectangle {
-                    x: Theme.gutter;
-                    y: 8px;
-                    width: parent.width - Theme.gutter * 2;
-                    height: parent.height;
-                    background: #00000000;
-
-                    IosRowBase { y: 0px; width: parent.width; title: "‹ Назад"; show_chevron: false; show_divider: false; activated => { root.system_page = 0; } }
-                    IosSectionTitle { x: 0px; y: 40px; title: "ДАТА И ВРЕМЯ"; }
-                    IosCard {
-                        x: 0px;
-                        y: 54px;
-                        width: parent.width;
-                        height: 88px;
-
-                        IosChoiceRow { y: 0px; width: parent.width; title: "Авто"; selected: root.setting_datetime_mode == "Авто"; reduce_motion: root.reduce_motion; show_divider: true; activated => { root.setting_datetime_mode = "Авто"; } }
-                        IosChoiceRow { y: 44px; width: parent.width; title: "Вручную"; selected: root.setting_datetime_mode == "Вручную"; reduce_motion: root.reduce_motion; show_divider: false; activated => { root.setting_datetime_mode = "Вручную"; } }
-                    }
-                }
-
-                if root.selected_index == 0 && root.system_page == 3 : Rectangle {
-                    x: Theme.gutter;
-                    y: 8px;
-                    width: parent.width - Theme.gutter * 2;
-                    height: parent.height;
-                    background: #00000000;
-
-                    IosRowBase { y: 0px; width: parent.width; title: "‹ Назад"; show_chevron: false; show_divider: false; activated => { root.system_page = 0; } }
-                    IosSectionTitle { x: 0px; y: 40px; title: "О СИСТЕМЕ"; }
-
-                    IosCard {
-                        x: 0px;
-                        y: 54px;
-                        width: parent.width;
-                        height: 88px;
-
-                        IosRowBase { y: 0px; width: parent.width; title: "BlackBerry UI Demo"; show_chevron: false; show_value: false; show_divider: true; activated => {}; }
-                        IosRowBase { y: 44px; width: parent.width; title: "Версия"; show_chevron: false; show_value: true; value_text: "v0.1"; show_divider: false; activated => {}; }
+                        IosRowBase { y: 0px; width: parent.width; title: "О системе"; show_value: false; show_divider: false; activated => { } }
                     }
                 }
 
@@ -651,6 +655,123 @@ export component SettingsApp inherits Rectangle {
                         font-weight: 600;
                     }
                 }
+            }
+        }
+    }
+
+    // Full-screen modal selector overlay (dims everything + bottom sheet).
+    selector_overlay := Rectangle {
+        x: 0px;
+        y: 0px;
+        width: parent.width;
+        height: parent.height;
+        background: #00000000;
+        visible: root.selector_open;
+
+        Rectangle {
+            width: parent.width;
+            height: parent.height;
+            background: Theme.scrim;
+            opacity: root.selector_open ? 1.0 : 0.0;
+            animate opacity { duration: root.reduce_motion ? 0ms : Theme.anim_fast; }
+        }
+
+        // Block clicks behind; tap outside does nothing (only Apply changes).
+        TouchArea {
+            width: parent.width;
+            height: parent.height;
+            enabled: root.selector_open;
+            clicked => {}
+            pointer-event(_) => {}
+        }
+
+        // Bottom sheet container.
+        sheet := Rectangle {
+            property <length> max_list_h: 220px;
+            property <length> row_h: 44px;
+            property <int> option_count: root.selector_kind == SelectionKind.Language ? 2 : (root.selector_kind == SelectionKind.DateTime ? 2 : 0);
+            property <length> content_h: option_count * row_h;
+            property <length> list_h: min(content_h, max_list_h);
+            property <length> header_h: 44px;
+            property <length> footer_h: 56px;
+
+            x: 0px;
+            width: parent.width;
+            height: header_h + list_h + footer_h;
+            y: root.selector_open ? parent.height - self.height : parent.height;
+            background: Theme.surface_bg;
+            border-width: 1px;
+            border-color: Theme.border;
+            border-radius: Theme.radius_lg;
+            clip: true;
+
+            animate y { duration: root.reduce_motion ? 0ms : Theme.anim_med; easing: ease-in-out; }
+
+            Rectangle {
+                x: (parent.width - 44px) / 2;
+                y: 8px;
+                width: 44px;
+                height: 4px;
+                border-radius: 2px;
+                background: Theme.border;
+                opacity: 0.75;
+            }
+
+            Text {
+                x: Theme.gutter;
+                y: 18px;
+                text: root.selector_kind == SelectionKind.Language ? "Язык" : (root.selector_kind == SelectionKind.DateTime ? "Дата и время" : "Выбор");
+                color: Theme.text;
+                font-size: Theme.font_md;
+                font-weight: 800;
+            }
+
+            // Options list (scrollable if needed).
+            list := Flickable {
+                x: 0px;
+                y: sheet.header_h;
+                width: parent.width;
+                height: sheet.list_h;
+                interactive: true;
+                viewport-width: parent.width;
+                viewport-height: options_container.height;
+
+                options_container := Rectangle {
+                    width: parent.width;
+                    height: sheet.content_h;
+                    background: #00000000;
+
+                    if root.selector_kind == SelectionKind.Language : Rectangle {
+                        width: parent.width;
+                        height: parent.height;
+                        IosChoiceRow { y: 0px; width: parent.width; title: "Русский"; selected: root.selector_pending_index == 0; reduce_motion: root.reduce_motion; show_divider: true; activated => { root.selector_pending_index = 0; } }
+                        IosChoiceRow { y: sheet.row_h; width: parent.width; title: "English"; selected: root.selector_pending_index == 1; reduce_motion: root.reduce_motion; show_divider: false; activated => { root.selector_pending_index = 1; } }
+                    }
+
+                    if root.selector_kind == SelectionKind.DateTime : Rectangle {
+                        width: parent.width;
+                        height: parent.height;
+                        IosChoiceRow { y: 0px; width: parent.width; title: "Авто"; selected: root.selector_pending_index == 0; reduce_motion: root.reduce_motion; show_divider: true; activated => { root.selector_pending_index = 0; } }
+                        IosChoiceRow { y: sheet.row_h; width: parent.width; title: "Вручную"; selected: root.selector_pending_index == 1; reduce_motion: root.reduce_motion; show_divider: false; activated => { root.selector_pending_index = 1; } }
+                    }
+                }
+            }
+
+            Rectangle {
+                x: 0px;
+                y: sheet.header_h + sheet.list_h;
+                width: parent.width;
+                height: 1px;
+                background: Theme.border;
+            }
+
+            IosPrimaryButton {
+                x: Theme.gutter;
+                y: sheet.header_h + sheet.list_h + 10px;
+                width: parent.width - Theme.gutter * 2;
+                text: "Применить";
+                reduce_motion: root.reduce_motion;
+                clicked => { root.apply_selector(); }
             }
         }
     }
