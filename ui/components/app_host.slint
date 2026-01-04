@@ -99,7 +99,7 @@ export component AppHost inherits Rectangle {
 
         Text {
             x: Theme.gutter;
-            y: 16px;
+            y: 10px;
             text: panel.title;
             color: Theme.text;
             font-size: Theme.font_xl;
@@ -108,7 +108,7 @@ export component AppHost inherits Rectangle {
 
         Rectangle {
             x: parent.width - Theme.gutter - 28px;
-            y: 12px;
+            y: 6px;
             width: 28px;
             height: 28px;
             border-radius: 8px;
@@ -134,7 +134,7 @@ export component AppHost inherits Rectangle {
 
         Rectangle {
             x: 0px;
-            y: 44px;
+            y: 34px;
             width: parent.width;
             height: 1px;
             background: Theme.border;
@@ -142,9 +142,9 @@ export component AppHost inherits Rectangle {
 
         content := Rectangle {
             x: 0px;
-            y: 45px;
+            y: 35px;
             width: parent.width;
-            height: parent.height - 45px;
+            height: parent.height - 35px;
             background: #00000000;
             clip: true;
 
