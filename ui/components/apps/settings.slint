@@ -1,15 +1,300 @@
 import { Theme } from "../theme.slint";
 
-export component SettingsApp inherits Rectangle {
+component SettingsNavItem inherits Rectangle {
+    in property <string> text: "";
+    in property <bool> selected: false;
+    in property <bool> reduce_motion: false;
+    callback clicked();
+
+    height: 34px;
+    background: selected ? Theme.focus_ring : #00000000;
+    border-radius: 10px;
+
+    Text {
+        x: 10px;
+        width: parent.width - 20px;
+        height: parent.height;
+        text: root.text;
+        color: root.selected ? Theme.text : Theme.text_dim;
+        font-size: Theme.font_sm;
+        font-weight: root.selected ? 700 : 600;
+        vertical-alignment: center;
+    }
+
+    TouchArea {
+        width: parent.width;
+        height: parent.height;
+        clicked => { root.clicked(); }
+    }
+
+    animate background { duration: root.reduce_motion ? 0ms : Theme.anim_fast; }
+}
+
+component SettingsToggleRow inherits Rectangle {
+    in property <string> label: "";
+    in-out property <bool> value: false;
+    in property <bool> reduce_motion: false;
+
+    height: 38px;
     background: #00000000;
 
     Text {
-        x: Theme.gutter;
-        y: Theme.gutter;
-        text: "Настройки (пока заглушка)";
-        color: Theme.text_dim;
-        font-size: Theme.font_md;
+        x: 0px;
+        width: parent.width - 72px;
+        height: parent.height;
+        text: root.label;
+        color: Theme.text;
+        font-size: Theme.font_sm;
         font-weight: 600;
+        vertical-alignment: center;
+    }
+
+    track := Rectangle {
+        x: parent.width - 58px;
+        y: (parent.height - 22px) / 2;
+        width: 58px;
+        height: 22px;
+        border-radius: 11px;
+        background: root.value ? Theme.accent : Theme.border;
+        animate background { duration: root.reduce_motion ? 0ms : Theme.anim_fast; }
+
+        thumb := Rectangle {
+            y: 3px;
+            width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            background: Theme.surface_bg;
+            x: root.value ? parent.width - self.width - 3px : 3px;
+            animate x { duration: root.reduce_motion ? 0ms : Theme.anim_fast; easing: ease-out; }
+        }
+    }
+
+    TouchArea {
+        width: parent.width;
+        height: parent.height;
+        clicked => { root.value = !root.value; }
     }
 }
 
+component SettingsSliderRow inherits Rectangle {
+    in property <string> label: "";
+    in property <float> minimum: 0;
+    in property <float> maximum: 100;
+    in property <float> step: 1;
+    in-out property <float> value: 50;
+    in property <bool> reduce_motion: false;
+
+    height: 44px;
+    background: #00000000;
+
+    Text {
+        x: 0px;
+        y: 0px;
+        width: parent.width;
+        height: 18px;
+        text: root.label;
+        color: Theme.text;
+        font-size: Theme.font_sm;
+        font-weight: 600;
+    }
+
+    track := Rectangle {
+        x: 0px;
+        y: parent.height - 12px;
+        width: parent.width;
+        height: 4px;
+        border-radius: 2px;
+        background: Theme.border;
+
+        fill := Rectangle {
+            x: 0px;
+            y: 0px;
+            width: parent.width * (root.value - root.minimum) / max(root.maximum - root.minimum, 1);
+            height: parent.height;
+            border-radius: parent.border-radius;
+            background: Theme.accent;
+            animate width { duration: root.reduce_motion ? 0ms : Theme.anim_fast; easing: ease-out; }
+        }
+    }
+
+    thumb := Rectangle {
+        width: 14px;
+        height: 14px;
+        border-radius: 7px;
+        background: Theme.accent;
+        y: track.y - (self.height - track.height) / 2;
+        x: clamp(track.width * (root.value - root.minimum) / max(root.maximum - root.minimum, 1) - self.width / 2, 0px, track.width - self.width);
+        animate x { duration: root.reduce_motion ? 0ms : Theme.anim_fast; easing: ease-out; }
+    }
+
+    function set-value(v: float) {
+        let snapped = root.step > 0 ? (round((v - root.minimum) / root.step) * root.step + root.minimum) : v;
+        root.value = max(root.minimum, min(root.maximum, snapped));
+    }
+
+    touch := TouchArea {
+        width: parent.width;
+        height: parent.height;
+        pointer-event(event) => {
+            if (event.button != PointerEventButton.left) { return; }
+            if (event.kind == PointerEventKind.up) { return; }
+            root.set-value(root.minimum + touch.mouse-x * (root.maximum - root.minimum) / max(track.width, 1px));
+        }
+        moved => {
+            root.set-value(root.minimum + touch.mouse-x * (root.maximum - root.minimum) / max(track.width, 1px));
+        }
+    }
+}
+
+export component SettingsApp inherits Rectangle {
+    in property <bool> reduce_motion: false;
+    in-out property <int> selected_index: 0;
+
+    // demo state (later wire to Rust)
+    in-out property <bool> setting_dark_mode: false;
+    in-out property <bool> setting_wifi: true;
+    in-out property <bool> setting_bluetooth: false;
+    in-out property <float> setting_brightness: 60;
+    in-out property <float> setting_volume: 70;
+
+    background: #00000000;
+
+    // Left navigation + right content.
+    nav := Rectangle {
+        x: 0px;
+        y: 0px;
+        width: 116px;
+        height: parent.height;
+        background: Theme.surface_bg_2;
+        border-width: 0px;
+        clip: true;
+
+        Rectangle {
+            x: parent.width - 1px;
+            y: 0px;
+            width: 1px;
+            height: parent.height;
+            background: Theme.border;
+        }
+
+        Text {
+            x: 10px;
+            y: 10px;
+            text: "Меню";
+            color: Theme.text_muted;
+            font-size: Theme.font_sm;
+            font-weight: 700;
+        }
+
+        menu := Rectangle {
+            x: 8px;
+            y: 32px;
+            width: parent.width - 16px;
+            height: parent.height - 40px;
+            background: #00000000;
+
+            SettingsNavItem { y: 0px; width: parent.width; text: "Система"; selected: root.selected_index == 0; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 0; } }
+            SettingsNavItem { y: 36px; width: parent.width; text: "Экран"; selected: root.selected_index == 1; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 1; } }
+            SettingsNavItem { y: 72px; width: parent.width; text: "Звук"; selected: root.selected_index == 2; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 2; } }
+            SettingsNavItem { y: 108px; width: parent.width; text: "Сеть"; selected: root.selected_index == 3; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 3; } }
+            SettingsNavItem { y: 144px; width: parent.width; text: "О системе"; selected: root.selected_index == 4; reduce_motion: root.reduce_motion; clicked => { root.selected_index = 4; } }
+        }
+    }
+
+    detail := Rectangle {
+        x: nav.width;
+        y: 0px;
+        width: parent.width - nav.width;
+        height: parent.height;
+        background: #00000000;
+
+        // "Система"
+        if root.selected_index == 0 : Rectangle {
+            x: Theme.gutter;
+            y: Theme.gutter;
+            width: parent.width - Theme.gutter * 2;
+            height: parent.height - Theme.gutter * 2;
+            background: #00000000;
+
+            Text { text: "Система"; color: Theme.text; font-size: Theme.font_lg; font-weight: 800; }
+
+            SettingsToggleRow { y: 28px; width: parent.width; label: "Тёмная тема"; value <=> root.setting_dark_mode; reduce_motion: root.reduce_motion; }
+        }
+
+        // "Экран"
+        if root.selected_index == 1 : Rectangle {
+            x: Theme.gutter;
+            y: Theme.gutter;
+            width: parent.width - Theme.gutter * 2;
+            height: parent.height - Theme.gutter * 2;
+            background: #00000000;
+
+            Text { text: "Экран"; color: Theme.text; font-size: Theme.font_lg; font-weight: 800; }
+            SettingsSliderRow { y: 30px; width: parent.width; label: "Яркость"; value <=> root.setting_brightness; reduce_motion: root.reduce_motion; }
+        }
+
+        // "Звук"
+        if root.selected_index == 2 : Rectangle {
+            x: Theme.gutter;
+            y: Theme.gutter;
+            width: parent.width - Theme.gutter * 2;
+            height: parent.height - Theme.gutter * 2;
+            background: #00000000;
+
+            Text { text: "Звук"; color: Theme.text; font-size: Theme.font_lg; font-weight: 800; }
+            SettingsSliderRow { y: 30px; width: parent.width; label: "Громкость"; value <=> root.setting_volume; reduce_motion: root.reduce_motion; }
+        }
+
+        // "Сеть"
+        if root.selected_index == 3 : Rectangle {
+            x: Theme.gutter;
+            y: Theme.gutter;
+            width: parent.width - Theme.gutter * 2;
+            height: parent.height - Theme.gutter * 2;
+            background: #00000000;
+
+            Text { text: "Сеть"; color: Theme.text; font-size: Theme.font_lg; font-weight: 800; }
+            SettingsToggleRow { y: 28px; width: parent.width; label: "Wi‑Fi"; value <=> root.setting_wifi; reduce_motion: root.reduce_motion; }
+            SettingsToggleRow { y: 66px; width: parent.width; label: "Bluetooth"; value <=> root.setting_bluetooth; reduce_motion: root.reduce_motion; }
+        }
+
+        // "О системе"
+        if root.selected_index == 4 : Rectangle {
+            x: Theme.gutter;
+            y: Theme.gutter;
+            width: parent.width - Theme.gutter * 2;
+            height: parent.height - Theme.gutter * 2;
+            background: #00000000;
+
+            Text { text: "О системе"; color: Theme.text; font-size: Theme.font_lg; font-weight: 800; }
+
+            Rectangle {
+                y: 30px;
+                width: parent.width;
+                height: 54px;
+                border-width: 1px;
+                border-color: Theme.border;
+                border-radius: Theme.radius_md;
+                background: Theme.surface_bg;
+
+                Text {
+                    x: 10px;
+                    y: 10px;
+                    text: "BlackBerry UI Demo";
+                    color: Theme.text;
+                    font-size: Theme.font_md;
+                    font-weight: 700;
+                }
+
+                Text {
+                    x: 10px;
+                    y: 28px;
+                    text: "v0.1";
+                    color: Theme.text_dim;
+                    font-size: Theme.font_sm;
+                    font-weight: 600;
+                }
+            }
+        }
+    }
+}
