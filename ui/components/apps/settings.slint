@@ -692,7 +692,9 @@ export component SettingsApp inherits Rectangle {
 
         // Bottom sheet container.
         sheet := Rectangle {
-            property <length> max_list_h: 220px;
+            // Keep a visible top gap on small screens (e.g. 320×240).
+            property <length> min_top_gap: 24px;
+            property <length> max_list_h: min(220px, max(parent.height - header_h - footer_h - min_top_gap, 0px));
             property <length> row_h: 44px;
             property <int> option_count: root.selector_kind == SelectionKind.Language ? 2 : (root.selector_kind == SelectionKind.DateTime ? 2 : 0);
             property <length> content_h: option_count * row_h;
@@ -807,11 +809,13 @@ export component SettingsApp inherits Rectangle {
         }
 
         about_sheet := Rectangle {
+            // Keep a visible top gap on small screens (e.g. 320×240).
+            property <length> min_top_gap: 24px;
             property <length> header_h: 44px;
             property <length> footer_h: 0px;
             x: 0px;
             width: parent.width;
-            height: 260px;
+            height: min(320px, max(parent.height - min_top_gap, 0px));
             y: root.about_open ? parent.height - self.height : parent.height;
             background: Theme.surface_bg;
             border-width: 1px;
